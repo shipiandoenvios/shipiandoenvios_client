@@ -1,0 +1,194 @@
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "next/navigation";
+import { MoveRight, MailIcon, LockIcon, Eye, EyeOff } from "lucide-react";
+import { LoginFormValues, loginSchema } from "@/packages/auth/schemas";
+import { useAuthStore } from "@/store/store";
+import { getApiUrl } from "@/packages/config";
+
+export function LoginForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const params = useParams();
+  const locale = params.locale as string; // Obtener el idioma actual
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+  });
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(getApiUrl(`/api/auth/login`), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        setError(result.message || "Error al iniciar sesión");
+        return;
+      }
+
+      setAuth(true, result.token, result.user);
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Validación de trial vencido y plan inactivo
+      const nowDate = new Date();
+      const { trialEnd, planActive } = result.user;
+      if (trialEnd && new Date(trialEnd) < nowDate && !planActive) {
+        // Redirigir a acceso denegado
+        window.location.href = `/${locale}/auth/access-denied`;
+        return;
+      }
+
+      if (trialEnd && new Date(trialEnd) < nowDate && !planActive) {
+        window.location.href = `/${locale}/auth/access-denied`;
+        return;
+      }
+      let redirectPath;
+
+      switch (result.user.role) {
+        case "SUPER_ADMIN":
+          redirectPath = "/app/dashboard";
+          break;
+        case "ADMIN":
+        case "EMPRESA":
+        case "ENCARGADO":
+        case "ADMINISTRATIVO":
+        case "ANALISTA":
+        case "EMPLOYEE":
+          redirectPath = "/app/accountant/dashboard";
+          break;
+        default:
+          redirectPath = "/app/client/dashboard";
+      }
+
+      const fullPath = `/${locale}${redirectPath}`;
+      window.location.href = fullPath;
+    } catch (err) {
+      setError("Error de conexión. Intenta de nuevo más tarde.");
+      console.error("Error en login:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)}>
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <label
+          htmlFor="email"
+          className="block text-sm font-bold text-gray-700 var(--font-nunito)"
+        >
+          Email
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MailIcon className="h-5 w-5 text-[#7dd3c8]" />
+          </div>
+          <input
+            id="email"
+            {...register("email")}
+            type="email"
+            className={`pl-10 block w-full px-4 py-2.5 border ${
+              errors.email ? "border-red-300" : "border-gray-200"
+            } rounded-lg shadow-sm focus:ring-2 focus:ring-[#7dd3c8] focus:border-transparent var(--font-nunito) transition-all duration-200`}
+            placeholder="correo@ejemplo.com"
+          />
+        </div>
+        {errors.email && (
+          <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="password"
+          className="block text-sm font-bold text-gray-700 var(--font-nunito)"
+        >
+          Contraseña
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <LockIcon className="h-5 w-5 text-[#7dd3c8]" />
+          </div>
+          <input
+            id="password"
+            {...register("password")}
+            type={showPassword ? "text" : "password"}
+            className={`pl-10 block w-full px-4 py-2.5 border ${
+              errors.password ? "border-red-300" : "border-gray-200"
+            } rounded-lg shadow-sm focus:ring-2 focus:ring-[#7dd3c8] focus:border-transparent var(--font-nunito) transition-all duration-200`}
+            placeholder="********"
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            onClick={togglePasswordVisibility}
+            aria-label={
+              showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+            }
+          >
+            {showPassword ? (
+              <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer" />
+            ) : (
+              <Eye className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer" />
+            )}
+          </button>
+        </div>
+        {errors.password && (
+          <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+        )}
+      </div>
+
+      <div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold var(--font-nunito) text-white bg-gradient-to-r from-[#FFB800] to-amber-500 hover:from-amber-500 hover:to-[#FFB800] transition-all duration-300 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {isLoading ? (
+            "Iniciando sesión..."
+          ) : (
+            <>
+              Iniciar sesión <MoveRight className="h-4 w-4" />
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+}

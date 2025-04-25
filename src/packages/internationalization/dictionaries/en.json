@@ -1,0 +1,213 @@
+{
+    "web": {
+      "title": "Sopy",
+      "global": {
+        "primaryCta": "Contact",
+        "secondaryCta": "More info"
+      },
+      "header": {
+        "home": "Home",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "contact": "Contact",
+        "product": {
+          "title": "Product",
+          "description": "Product description",
+          "pricing": "Pricing"
+        }
+      },
+      "home": {
+        "title": "Hello",
+        "description": "Appwise Innovations - Innovative solutions for your business",
+        "welcome": "Welcome to our service",
+        "intro": "We offer digital solutions for your business with our CMS tools and custom applications.",
+        "services_button": "Our services",
+        "contact_button": "Contact us",
+        "cases": {
+          "title": "Cases"
+        },
+        "features": {
+          "title": "Features",
+          "description": "Our features",
+          "items": {
+            "feature1": {
+              "title": "Feature 1",
+              "description": "Feature 1 description"
+            },
+            "feature2": {
+              "title": "Feature 2",
+              "description": "Feature 2 description"
+            },
+            "feature3": {
+              "title": "Feature 3",
+              "description": "Feature 3 description"
+            },
+            "feature4": {
+              "title": "Feature 4",
+              "description": "Feature 4 description"
+            }
+          }
+        },
+        "stats": {
+          "title": "Real Results for Accounting Professionals",
+          "description": "Our platform is specifically designed to help accountants manage their clients' tax records better, reduce administrative burden, and increase satisfaction.",
+          "items": {
+            "item1": {
+              "title": "Tax records processed",
+              "description": "Tax records processed"
+            },
+            "item2": {
+              "title": "Active accounting firms",
+              "description": "Active accounting firms"
+            },
+            "item3": {
+              "title": "Time saved in compliance",
+              "description": "Time saved in compliance"
+            },
+            "item4": {
+              "title": "Client satisfaction",
+              "description": "Client satisfaction"
+            }
+          }
+        },
+        "testimonials": {
+          "title": "Testimonials",
+          "items": {
+            "item1": {
+              "title": "Testimonial 1",
+              "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+              "author": {
+                "name": "Author 1",
+                "image": "https://via.placeholder.com/150"
+              }
+            },
+            "item2": {
+              "title": "Testimonial 2",
+              "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+              "author": {
+                "name": "Author 2",
+                "image": "https://via.placeholder.com/150"
+              }
+            },
+            "item3": {
+              "title": "Testimonial 3",
+              "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+              "author": {
+                "name": "Author 3",
+                "image": "https://via.placeholder.com/150"
+              }
+            },
+            "item4": {
+              "title": "Testimonial 4",
+              "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+              "author": {
+                "name": "Author 4",
+                "image": "https://via.placeholder.com/150"
+              }
+            }
+          }
+        },
+        "faq": {
+          "title": "Common Questions About SOPY",
+          "description": "Get quick answers to your most pressing questions about our tax management platform. We've compiled everything accountants need to know about transforming their client's tax record management.",
+          "cta": "Any questions? Reach out to our team",
+          "items": {
+            "item1": {
+              "question": "What is SOPY?",
+              "answer": "SOPY is a specialized SaaS platform that helps accountants manage their clients' tax records efficiently and accurately, ensuring compliance and reducing administrative overhead."
+            },
+            "item2": {
+              "question": "How does SOPY help my accounting practice?",
+              "answer": "SOPY streamlines tax record management, automates routine compliance tasks, provides real-time updates on regulations, and offers client-friendly interfaces, allowing you to focus on providing value-added services."
+            },
+            "item3": {
+              "question": "Can my clients access their own data?",
+              "answer": "Yes, SOPY provides a secure client portal where your clients can view their tax records, track their compliance status, and communicate with you directly about their tax matters."
+            },
+            "item4": {
+              "question": "Is SOPY secure and compliant?",
+              "answer": "Absolutely. SOPY is built with industry-leading security protocols and is fully compliant with data protection regulations, ensuring your clients' sensitive tax information is always protected."
+            }
+          }
+        },
+        "cta": {
+          "title": "Transform Your Accounting Practice Today",
+          "description": "Join hundreds of visionary accountants who have modernized their tax management processes. SOPY offers the tools, support, and efficiency you need to stand out in providing tax services to your clients. Start in minutes."
+        }
+      },
+      "services": {
+        "title": "Our Services",
+        "cms": {
+          "title": "CMS System",
+          "description": "Easily manage your content with our content management system.",
+          "more_info": "More info →"
+        },
+        "app": {
+          "title": "Custom Application",
+          "description": "Access all the functionalities of our application tailored to your needs.",
+          "more_info": "More info →"
+        }
+      },
+      "pricing": {
+        "title": "Prices that make sense for your practice",
+        "description": "Choose the plan that fits your accounting practice's needs",
+        "monthly": "month",
+        "popular": "POPULAR",
+        "tryIt": "Try it out",
+        "contactUs": "Contact us",
+        "plans": [
+          {
+            "name": "Startup",
+            "description": "Perfect for small accounting practices just getting started",
+            "price": "40"
+          },
+          {
+            "name": "Growth",
+            "description": "Ideal for established firms looking to expand their services",
+            "price": "80"
+          },
+          {
+            "name": "Enterprise",
+            "description": "Complete solution for large accounting firms with complex needs",
+            "price": "160"
+          }
+        ],
+        "features": {
+          "sso": "Single Sign-On (SSO)",
+          "ai": "AI Assistant",
+          "version": "Version Control",
+          "members": "{count} team members"
+        }
+      },
+      "contact": {
+      "meta": {
+        "title": "Let's talk about your Accounting Practice",
+        "description": "Contact us to discuss how SOPY can help simplify tax management for your clients and grow your practice."
+      },
+      "hero": {
+        "benefits": {
+          "item1": {
+            "title": "Custom Consultation",
+            "description": "Get personalized solutions and expert advice tailored to your accounting practice needs."
+          },
+          "item2": {
+            "title": "Complete Support",
+            "description": "Our team is available to help you every step of the way with your experience in SOPY."
+          },
+          "item3": {
+            "title": "Implementation Support",
+            "description": "Our experts will help you transition to SOPY without any problems and with minimal disruption to your practice."
+          }
+        },
+        "form": {
+          "title": "Contact us",
+          "date": "Date",
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "resume": "Your practice details",
+          "cta": "Send query"
+        }
+      }
+    }
+  }
+}

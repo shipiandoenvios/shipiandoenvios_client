@@ -1,0 +1,213 @@
+{
+  "web": {
+    "title": "Sopy",
+    "global": {
+      "primaryCta": "Contactar",
+      "secondaryCta": "Más información"
+    },
+    "header": {
+      "home": "Inicio",
+      "signIn": "Iniciar sesión",
+      "signUp": "Registrarse",
+      "contact": "Contacto",
+      "product": {
+        "title": "Producto",
+        "description": "Descripción del producto",
+        "pricing": "Precio"
+      }
+    },
+    "home": {
+      "title": "Reduce hasta 70% del tiempo en trámites tributarios con SOPY",
+      "description": "Gestión tributaria simplificada: lo complejo hecho fácil para contadores y sus clientes",
+      "welcome": "Bienvenido a nuestro servicio",
+      "intro": "Ofrecemos soluciones digitales para tu negocio con nuestras herramientas de CMS y aplicaciones personalizadas.",
+      "services_button": "Nuestros servicios",
+      "contact_button": "Contactanos",
+      "cases": {
+        "title": "Casos de éxito"
+      },
+      "features": {
+        "title": "Nuestras Características",
+        "description": "Nuestras características",
+        "items":{
+          "feature1": {
+            "title": "Característica 1",
+            "description": "Siempre al día con la normativa del SII, sin preocupaciones"
+          },
+          "feature2": {
+            "title": "Característica 2",
+            "description": "Gestión tributaria simplificada: lo complejo hecho fácil para contadores y sus clientes"
+          },
+          "feature3": {
+            "title": "Característica 3",
+            "description": "Tu información tributaria segura y accesible cuando la necesites"
+          },
+          "feature4": {
+            "title": "Característica 4",
+            "description": "Desarrollamos herramientas personalizadas para tu práctica contable"
+          }
+        }
+      },
+      "stats": {
+        "title": "Resultados Reales para Profesionales Contables",
+        "description": "Nuestra plataforma está diseñada específicamente para ayudar a contadores a gestionar mejor los registros tributarios de sus clientes, reducir la carga administrativa y aumentar la satisfacción.",
+        "items": {
+          "item1": {
+            "title": "Registros tributarios procesados",
+            "description": "Registros tributarios procesados"
+          },
+          "item2": {
+            "title": "Firmas contables activas",
+            "description": "Firmas contables activas"
+          },
+          "item3": {
+            "title": "Tiempo ahorrado en cumplimiento",
+            "description": "Tiempo ahorrado en cumplimiento"
+          },
+          "item4": {
+            "title": "Satisfacción del cliente",
+            "description": "Satisfacción del cliente"
+          }
+        }
+      },
+      "testimonials": {
+        "title": "Testimonios",
+        "items": {
+          "item1": {
+            "title": "Testimonio 1",
+            "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+            "author": {
+              "name": "Autor 1",
+              "image": "https://imgs.search.brave.com/zx_bTbckig_4ri5F71ccWtUsyVslJIC2Zf7S4A0Tfjs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/dmVjdG9yLXByZW1p/dW0vcGVyc29uYS1j/YW1pc2EtYXp1bC1x/dWUtZGljZS1ub21i/cmUtcGVyc29uYV8x/MDI5OTQ4LTcwNDAu/anBnP3NlbXQ9YWlz/X2h5YnJpZA"
+            }
+          },
+          "item2": {
+            "title": "Testimonio 2",
+            "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+            "author": {
+              "name": "Autor 2",
+              "image": "https://imgs.search.brave.com/zx_bTbckig_4ri5F71ccWtUsyVslJIC2Zf7S4A0Tfjs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/dmVjdG9yLXByZW1p/dW0vcGVyc29uYS1j/YW1pc2EtYXp1bC1x/dWUtZGljZS1ub21i/cmUtcGVyc29uYV8x/MDI5OTQ4LTcwNDAu/anBnP3NlbXQ9YWlz/X2h5YnJpZA"
+            }
+          },
+          "item3": {
+            "title": "Testimonio 3",
+            "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of.",
+            "author": {
+              "name": "Autor 3",
+              "image": "https://imgs.search.brave.com/zx_bTbckig_4ri5F71ccWtUsyVslJIC2Zf7S4A0Tfjs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/dmVjdG9yLXByZW1p/dW0vcGVyc29uYS1j/YW1pc2EtYXp1bC1x/dWUtZGljZS1ub21i/cmUtcGVyc29uYV8x/MDI5OTQ4LTcwNDAu/anBnP3NlbXQ9YWlz/X2h5YnJpZA"
+            }
+          },
+          "item4": {
+            "title": "Testimonio 4",
+            "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+            "author": {
+              "name": "Autor 4",
+              "image": "https://imgs.search.brave.com/zx_bTbckig_4ri5F71ccWtUsyVslJIC2Zf7S4A0Tfjs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/dmVjdG9yLXByZW1p/dW0vcGVyc29uYS1j/YW1pc2EtYXp1bC1x/dWUtZGljZS1ub21i/cmUtcGVyc29uYV8x/MDI5OTQ4LTcwNDAu/anBnP3NlbXQ9YWlz/X2h5YnJpZA"
+            }
+          }
+        }
+      },
+      "faq": {
+        "title": "Preguntas Frecuentes sobre SOPY",
+        "description": "Obtén respuestas rápidas a tus preguntas más urgentes sobre nuestra plataforma de gestión tributaria. Hemos recopilado todo lo que los contadores necesitan saber sobre la transformación de la gestión de registros tributarios de sus clientes.",
+        "cta": "¿Tienes preguntas? Contáctanos",
+        "items": {
+          "item1": {
+            "question": "¿Qué es SOPY?",
+            "answer": "SOPY es una plataforma SaaS especializada que ayuda a los contadores a gestionar los registros tributarios de sus clientes de manera eficiente y precisa, garantizando el cumplimiento y reduciendo la carga administrativa."
+          },
+          "item2": {
+            "question": "¿Cómo ayuda SOPY a mi práctica contable?",
+            "answer": "SOPY agiliza la gestión de registros tributarios, automatiza tareas rutinarias de cumplimiento, proporciona actualizaciones en tiempo real sobre las normativas y ofrece interfaces amigables para el cliente, permitiéndote centrarte en proporcionar servicios de valor añadido."
+          },
+          "item3": {
+            "question": "¿Pueden mis clientes acceder a sus propios datos?",
+            "answer": "Sí, SOPY proporciona un portal seguro para clientes donde pueden ver sus registros tributarios, seguir su estado de cumplimiento y comunicarse directamente contigo sobre sus asuntos fiscales."
+          },
+          "item4": {
+            "question": "¿Es SOPY seguro y cumple con las normativas?",
+            "answer": "Absolutamente. SOPY está construido con protocolos de seguridad líderes en la industria y cumple completamente con las regulaciones de protección de datos, asegurando que la información fiscal sensible de tus clientes esté siempre protegida."
+          }
+        }
+      },
+      "cta": {
+        "title": "Transforma tu Práctica Contable Hoy",
+        "description": "Únete a cientos de contadores visionarios que ya han modernizado sus procesos de gestión tributaria. SOPY ofrece las herramientas, el apoyo y la eficiencia que necesitas para destacar en la prestación de servicios fiscales a tus clientes. Comienza en minutos."
+      }
+    },
+    "services": {
+      "title": "Nuestros Servicios",
+      "cms": {
+        "title": "Sistema CMS",
+        "description": "Gestiona fácilmente tu contenido con nuestro sistema de gestión de contenido.",
+        "more_info": "Más información →"
+      },
+      "app": {
+        "title": "Aplicación Personalizada",
+        "description": "Accede a todas las funcionalidades de nuestra aplicación adaptadas a tus necesidades.",
+        "more_info": "Más información →"
+      }
+    },
+    "pricing": {
+      "title": "Precios que tienen sentido para tu práctica",
+      "description": "Elige el plan que se adapte a las necesidades de tu práctica contable",
+      "monthly": "mes",
+      "popular": "POPULAR",
+      "tryIt": "Pruébalo",
+      "contactUs": "Contáctanos",
+      "plans": [
+        {
+          "name": "Pequeña Empresa",
+          "description": "Perfecto para pequeñas prácticas contables que están comenzando",
+          "price": "40"
+        },
+        {
+          "name": "Mediana Empresa",
+          "description": "Ideal para firmas establecidas que buscan expandir sus servicios",
+          "price": "80"
+        },
+        {
+          "name": "Empresarial",
+          "description": "Solución completa para grandes firmas contables con necesidades complejas",
+          "price": "160"
+        }
+      ],
+      "features": {
+        "sso": "Inicio de Sesión Único (SSO)",
+        "ai": "Asistente de IA",
+        "version": "Control de Versiones",
+        "members": "{count} miembros del equipo"
+      }
+    },
+    "contact": {
+      "meta": {
+        "title": "Hablemos sobre tu Práctica Contable",
+        "description": "Contacta con nuestro equipo para discutir cómo SOPY puede ayudar a simplificar la gestión tributaria para tus clientes y hacer crecer tu práctica."
+      },
+      "hero": {
+        "benefits": {
+          "item1": {
+            "title": "Consulta Personalizada",
+            "description": "Obtén soluciones personalizadas y asesoramiento experto específico para las necesidades de tu práctica contable."
+          },
+          "item2": {
+            "title": "Soporte Completo",
+            "description": "Nuestro equipo está disponible para ayudarte en cada paso del camino con tu experiencia en SOPY."
+          },
+          "item3": {
+            "title": "Soporte de Implementación",
+            "description": "Nuestros expertos te ayudarán a hacer la transición a SOPY sin problemas y con mínima interrupción para tu práctica."
+          }
+        },
+        "form": {
+          "title": "Contacta con nosotros",
+          "date": "Fecha",
+          "firstName": "Nombre",
+          "lastName": "Apellido",
+          "resume": "Detalles de tu práctica",
+          "cta": "Enviar consulta"
+        }
+      }
+    }
+  }
+} 
