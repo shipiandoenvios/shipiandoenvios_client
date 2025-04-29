@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/packages/design-system/lib/utils";
+import logo from "@/packages/images/new-location-icon.svg";
+import Image from "next/image";
 
 export default function Header() {
   const t = useTranslations("web");
@@ -48,15 +50,20 @@ export default function Header() {
     <header
       className={cn(
         "fixed top-0 left-0 z-50 w-full transition-all duration-300",
-        scrolled ? "bg-white/95 backdrop-blur-sm shadow-sm" : "bg-transparent",
-        isOpen && "bg-white shadow-sm"
+        scrolled
+          ? "bg-[#1D3F60]/60 backdrop-blur-sm shadow-sm"
+          : "bg-transparent",
+        isOpen && "bg-[#1D3F60]/60 shadow-sm"
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/web" className="flex items-center">
-            <img src="/logo_sopy.png" alt="Logo" className="h-20 w-40" />
+            <Image src={logo} alt="Logo" className="h-[30px] w-[40px]" />
+            <h1 className="text-white text-[16px] font-bold tracking-[2px]">
+              SHIPIANDO
+            </h1>
           </Link>
 
           {/* Navegación desktop */}

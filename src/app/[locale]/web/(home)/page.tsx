@@ -1,21 +1,18 @@
 import { Hero } from "./components/hero";
-import { Cases } from "./components/cases";
-import { Features } from "./components/features";
-import { Stats } from "./components/stats";
-import { Testimonials } from "./components/testimonials";
+import { Works } from "./components/works";
 import { FAQ } from "./components/faq";
-import { CTA } from "./components/cta";
+import { Services } from "./components/services";
+import Send from "./components/send";
 
 export default function Home() {
   return (
-    <main className="container px-2 lg:px-0 min-h-screen mx-auto">
+    <main className="container lg:px-0 min-h-screen mx-auto">
       <Hero />
-      <Cases />
-      <Features />
-      <Stats />
-      <Testimonials />
-      <FAQ />
-      <CTA />
+      <Works />
+      <Services />
+      <Send />
+      {/*
+      <FAQ /> */}
     </main>
   );
 }

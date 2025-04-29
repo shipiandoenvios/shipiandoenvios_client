@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { FileSpreadsheet, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
+import Image from "next/image";
+import Camion from "@/packages/images/camion-footer.svg";
 
 const LegalLinks = () => {
   const links = [
@@ -27,22 +29,27 @@ const LegalLinks = () => {
 export const Footer = () => (
   <footer className="relative mt-12">
     {/* Decorador superior */}
-    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FFB800] via-[#7dd3c8] to-transparent"></div>
+    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1E4063] via-[#7d9fd3] to-transparent"></div>
 
     <div className="container mx-auto px-4 py-12">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <div className="bg-[#FFB800]/10 p-2 rounded-lg">
-              <FileSpreadsheet className="h-6 w-6 text-[#FFB800]" />
+              <Image
+                alt=""
+                className="text-[#1E4063]"
+                height={50}
+                src={Camion}
+                width={50}
+              />
             </div>
-            <h3 className="text-2xl font-black var(--font-nunito) bg-gradient-to-r from-[#FFB800] via-[#9747FF] to-[#7dd3c8] inline-block text-transparent bg-clip-text">
-              SOPY
+            <h3 className="text-2xl text-[#1E4063] font-black var(--font-nunito)">
+              Shipiando Envios
             </h3>
           </div>
           <p className="text-sm text-gray-500 var(--font-nunito)">
-            Simplificando la gestión tributaria para contadores y sus clientes
-            desde 2024.
+            Los envíos más rapidos de todo Buenos Aires.
           </p>
         </div>
 
@@ -57,13 +64,6 @@ export const Footer = () => (
             >
               <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#FFB800] mr-0 group-hover:mr-2 transition-all duration-300"></span>
               Inicio
-            </Link>
-            <Link
-              href="/pricing"
-              className="group flex items-center text-sm var(--font-nunito) text-gray-600 hover:text-[#FFB800] transition-colors duration-200"
-            >
-              <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#FFB800] mr-0 group-hover:mr-2 transition-all duration-300"></span>
-              Precios
             </Link>
             <Link
               href="/contact"
@@ -85,10 +85,10 @@ export const Footer = () => (
               className="flex items-center gap-3 group"
             >
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[#7dd3c8]/10 group-hover:bg-[#7dd3c8]/20 transition-colors">
-                <Mail className="h-4 w-4 text-[#7dd3c8]" />
+                <Mail className="h-4 w-4 text-[#1E4063]" />
               </div>
               <span className="text-sm text-gray-600 group-hover:text-[#7dd3c8] transition-colors var(--font-nunito)">
-                info@sopy.com
+                info@shipiando.com
               </span>
             </a>
             <a
@@ -96,7 +96,7 @@ export const Footer = () => (
               className="flex items-center gap-3 group"
             >
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[#7dd3c8]/10 group-hover:bg-[#7dd3c8]/20 transition-colors">
-                <Phone className="h-4 w-4 text-[#7dd3c8]" />
+                <Phone className="h-4 w-4 text-[#1E4063]" />
               </div>
               <span className="text-sm text-gray-600 group-hover:text-[#7dd3c8] transition-colors var(--font-nunito)">
                 +56 2 2123 4567
@@ -108,7 +108,7 @@ export const Footer = () => (
 
       <div className="mt-12 pt-6 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center">
         <p className="text-xs text-gray-400 var(--font-nunito) mb-4 md:mb-0">
-          © {new Date().getFullYear()} SOPY. Todos los derechos reservados.
+          © {new Date().getFullYear()} Shipiando. Todos los derechos reservados.
         </p>
         <div className="flex items-center gap-6">
           <LegalLinks />
