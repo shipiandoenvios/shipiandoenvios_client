@@ -113,20 +113,20 @@
           "cta": "Any questions? Reach out to our team",
           "items": {
             "item1": {
-              "question": "What is SOPY?",
-              "answer": "SOPY is a specialized SaaS platform that helps accountants manage their clients' tax records efficiently and accurately, ensuring compliance and reducing administrative overhead."
+              "question": "What is Shipiando?",
+              "answer": "Shipiando is a local delivery company that provides fast, secure, and affordable package transportation services across the province. We specialize in connecting people and businesses through efficient, reliable logistics solutions. Whether you need to send a package to another city or receive products with peace of mind, Shipiando is here to help."
             },
             "item2": {
-              "question": "How does SOPY help my accounting practice?",
-              "answer": "SOPY streamlines tax record management, automates routine compliance tasks, provides real-time updates on regulations, and offers client-friendly interfaces, allowing you to focus on providing value-added services."
+              "question": "Why choose us over another company?",
+              "answer": "At Shipiando, we prioritize punctuality, personalized service, and a strong commitment to your local community. We know every corner of the province, which allows us to deliver your packages quickly, safely, and efficiently. Plus, our customer support is friendly, fast, and always available. We’re not just another delivery company — we’re part of your daily life."
             },
             "item3": {
-              "question": "Can my clients access their own data?",
-              "answer": "Yes, SOPY provides a secure client portal where your clients can view their tax records, track their compliance status, and communicate with you directly about their tax matters."
+              "question": "Which areas of the province do you cover?",
+              "answer": "At Shipiando, we deliver throughout the entire province. Whether you're in the city, a small town, or a rural area, we reach your door. Our goal is to ensure that everyone, no matter where they live, can receive their packages quickly and safely."
             },
             "item4": {
-              "question": "Is SOPY secure and compliant?",
-              "answer": "Absolutely. SOPY is built with industry-leading security protocols and is fully compliant with data protection regulations, ensuring your clients' sensitive tax information is always protected."
+              "question": "What can I send with you?",
+              "answer": "With Shipiando, you can send a wide range of packages: online purchases, documents, gifts, merchandise from your business, and more. As long as the contents are legal, safe, and comply with our shipping policies, we’ll deliver it for you!"
             }
           }
         },

@@ -113,20 +113,20 @@
         "cta": "¿Tienes preguntas? Contáctanos",
         "items": {
           "item1": {
-            "question": "¿Qué es SOPY?",
-            "answer": "SOPY es una plataforma SaaS especializada que ayuda a los contadores a gestionar los registros tributarios de sus clientes de manera eficiente y precisa, garantizando el cumplimiento y reduciendo la carga administrativa."
+            "question": "¿Qué es Shipiando?",
+            "answer": "Shipiando es una empresa de envíos que ofrece servicios rápidos, seguros y accesibles de transporte de paquetes dentro de toda la provincia. Nos especializamos en conectar personas y negocios a través de soluciones logísticas eficientes, adaptadas a tus necesidades. Ya sea que necesites enviar un paquete a otra ciudad o recibir productos de forma confiable, en Shipiando estamos para ayudarte."
           },
           "item2": {
-            "question": "¿Cómo ayuda SOPY a mi práctica contable?",
-            "answer": "SOPY agiliza la gestión de registros tributarios, automatiza tareas rutinarias de cumplimiento, proporciona actualizaciones en tiempo real sobre las normativas y ofrece interfaces amigables para el cliente, permitiéndote centrarte en proporcionar servicios de valor añadido."
+            "question": "¿Porque nosotros antes que otra compañia?",
+            "answer": "En Shipiando, priorizamos la puntualidad, la atención personalizada y el compromiso con tu comunidad local. Conocemos cada rincón de la provincia y eso nos permite entregar tus paquetes de forma rápida, segura y eficiente. Además, nuestra atención al cliente es cercana, ágil y siempre disponible para ayudarte. No somos una empresa más: somos parte de tu día a día."
           },
           "item3": {
-            "question": "¿Pueden mis clientes acceder a sus propios datos?",
-            "answer": "Sí, SOPY proporciona un portal seguro para clientes donde pueden ver sus registros tributarios, seguir su estado de cumplimiento y comunicarse directamente contigo sobre sus asuntos fiscales."
+            "question": "¿A que parte de la provincia llegan?",
+            "answer": "En Shipiando cubrimos toda la provincia. Ya sea que estés en la ciudad, en un pueblo o en una zona rural, llegamos hasta tu puerta. Nuestro objetivo es que cualquier persona, viva donde viva, pueda recibir sus envíos de forma rápida y segura."
           },
           "item4": {
-            "question": "¿Es SOPY seguro y cumple con las normativas?",
-            "answer": "Absolutamente. SOPY está construido con protocolos de seguridad líderes en la industria y cumple completamente con las regulaciones de protección de datos, asegurando que la información fiscal sensible de tus clientes esté siempre protegida."
+            "question": "¿Que es lo que puedo enviar con ustedes?",
+            "answer": "En Shipiando podés enviar una amplia variedad de paquetes: productos comprados online, documentos, regalos, mercadería de tu negocio, y mucho más. Siempre y cuando el contenido sea legal, seguro y cumpla con nuestras políticas de envío, ¡nosotros lo transportamos por vos!"
           }
         }
       },

@@ -2,7 +2,7 @@
 export * from "./authService";
 
 // Exportar funciones JWT
-export * from "./jwt";
+// export * from "./jwt";
 
 // Exportar schemas
 export * from "./schemas";

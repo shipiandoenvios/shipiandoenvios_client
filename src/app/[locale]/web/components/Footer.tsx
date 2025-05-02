@@ -49,7 +49,7 @@ export const Footer = () => (
             </h3>
           </div>
           <p className="text-sm text-gray-500 var(--font-nunito)">
-            Los envíos más rapidos de todo Buenos Aires.
+            Los envíos más rápidos de todo Buenos Aires.
           </p>
         </div>
 
@@ -60,16 +60,16 @@ export const Footer = () => (
           <div className="flex flex-col space-y-3">
             <Link
               href="/"
-              className="group flex items-center text-sm var(--font-nunito) text-gray-600 hover:text-[#FFB800] transition-colors duration-200"
+              className="group flex items-center text-sm var(--font-nunito) text-gray-600 hover:text-[#1E4063] transition-colors duration-200"
             >
-              <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#FFB800] mr-0 group-hover:mr-2 transition-all duration-300"></span>
+              <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#1E4063] mr-0 group-hover:mr-2 transition-all duration-300"></span>
               Inicio
             </Link>
             <Link
               href="/contact"
-              className="group flex items-center text-sm var(--font-nunito) text-gray-600 hover:text-[#FFB800] transition-colors duration-200"
+              className="group flex items-center text-sm var(--font-nunito) text-gray-600 hover:text-[#1E4063] transition-colors duration-200"
             >
-              <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#FFB800] mr-0 group-hover:mr-2 transition-all duration-300"></span>
+              <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#1E4063] mr-0 group-hover:mr-2 transition-all duration-300"></span>
               Contacto
             </Link>
           </div>
