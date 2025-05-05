@@ -66,7 +66,7 @@ export const Footer = () => (
               Inicio
             </Link>
             <Link
-              href="/contact"
+              href="/"
               className="group flex items-center text-sm var(--font-nunito) text-gray-600 hover:text-[#1E4063] transition-colors duration-200"
             >
               <span className="inline-block w-0 group-hover:w-2 h-0.5 bg-[#1E4063] mr-0 group-hover:mr-2 transition-all duration-300"></span>
@@ -81,7 +81,7 @@ export const Footer = () => (
           </h4>
           <div className="flex flex-col space-y-3">
             <a
-              href="mailto:info@sopy.com"
+              href="mailto:info@shipiando.com"
               className="flex items-center gap-3 group"
             >
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[#7dd3c8]/10 group-hover:bg-[#7dd3c8]/20 transition-colors">
