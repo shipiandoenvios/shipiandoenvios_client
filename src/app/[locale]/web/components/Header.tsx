@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/packages/design-system/lib/utils";
+import logo from "@/packages/images/new-location-icon.svg";
+import Image from "next/image";
 
 export default function Header() {
   const t = useTranslations("web");
@@ -48,22 +50,27 @@ export default function Header() {
     <header
       className={cn(
         "fixed top-0 left-0 z-50 w-full transition-all duration-300",
-        scrolled ? "bg-white/95 backdrop-blur-sm shadow-sm" : "bg-transparent",
-        isOpen && "bg-white shadow-sm"
+        scrolled
+          ? "bg-[#1D3F60]/60 backdrop-blur-sm shadow-sm"
+          : "bg-transparent",
+        isOpen && "bg-[#1D3F60]/60 shadow-sm"
       )}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex h-20 items-center justify-between">
+      <div className="container mx-auto px-4 xl:mt-4">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/web" className="flex items-center">
-            <img src="/logo_sopy.png" alt="Logo" className="h-20 w-40" />
+            <Image src={logo} alt="Logo" className="h-[30px] w-[40px]" />
+            <h1 className="text-white text-[16px] font-bold tracking-[2px] xl:text-[36px] ">
+              SHIPIANDO
+            </h1>
           </Link>
 
           {/* Navegación desktop */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="/web"
-              className="text-gray-700 hover:text-[#FFB800] font-medium text-sm transition-colors duration-200"
+              className="text-white hover:text-[#1D3F60] font-medium text-sm transition-colors duration-200 xl:text-[22px]"
             >
               Inicio
             </Link>
@@ -72,9 +79,9 @@ export default function Header() {
             <div className="relative" ref={productoRef}>
               <button
                 onClick={() => setProductoOpen(!productoOpen)}
-                className="flex items-center text-gray-700 hover:text-[#FFB800] font-medium text-sm transition-colors duration-200"
+                className="flex items-center text-white hover:text-[#1D3F60] font-medium text-sm transition-colors duration-200 xl:text-[22px]"
               >
-                Producto
+                Servicios
                 <ChevronDown
                   className={cn(
                     "ml-2 h-4 w-4 transition-transform duration-200",
@@ -87,13 +94,14 @@ export default function Header() {
                 <div className="absolute left-0 mt-2 w-60 bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden z-50">
                   <div className="p-4">
                     <h3 className="font-bold var(--font-nunito) text-gray-800 mb-1">
-                      Producto
+                      Envio de mensajería
                     </h3>
                     <p className="text-sm text-gray-500 var(--font-nunito) mb-3">
-                      Gestionar registros tributarios nunca fue tan fácil
+                      ¡Danos la información de tu paquete y nosotros te lo
+                      enviamos!
                     </p>
 
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Link
                         href="/web/pricing"
                         className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#FFB800] rounded-md transition-colors"
@@ -102,7 +110,7 @@ export default function Header() {
                         Precios
                         <ChevronDown className="h-4 w-4 transform -rotate-90" />
                       </Link>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               )}
@@ -110,9 +118,9 @@ export default function Header() {
 
             <Link
               href="/web/contact"
-              className="text-gray-700 hover:text-[#FFB800] font-medium text-sm transition-colors duration-200"
+              className="text-white hover:text-[#1D3F60] font-medium text-sm transition-colors duration-200 xl:text-[22px]"
             >
-              Contacto
+              Sucursales
             </Link>
           </nav>
 
@@ -121,16 +129,16 @@ export default function Header() {
             <Button
               variant="ghost"
               asChild
-              className="font-medium hover:text-[#FFB800] hover:bg-transparent"
+              className="font-medium text-white hover:text-[#1D3F60] hover:bg-transparent xl:text-[18px]"
             >
               <Link href="/auth/login">{t("header.signIn")}</Link>
             </Button>
-            {/* <Button
-              className="bg-[#FFB800] hover:bg-[#FFE01B] text-black font-bold transition-all duration-200 shadow-sm hover:shadow"
+            <Button
+              className="bg-[#1D3F60] hover:bg-[#44697a] text-white font-bold transition-all duration-200 shadow-sm hover:shadow xl:text-[18px]"
               asChild
             >
               <Link href="/auth/register">{t("header.signUp")}</Link>
-            </Button> */}
+            </Button>
           </div>
 
           {/* Botón de menú móvil */}
@@ -203,18 +211,18 @@ export default function Header() {
                 asChild
                 className="w-full justify-center font-medium"
               >
-                <Link href="/auth/login" onClick={() => setOpen(false)}>
+                {/* <Link href="/auth/login" onClick={() => setOpen(false)}>
                   {t("header.signIn")}
-                </Link>
+                </Link> */}
               </Button>
-              {/* <Button
+              <Button
                 className="w-full justify-center bg-[#FFB800] hover:bg-[#FFE01B] text-black font-bold"
                 asChild
               >
                 <Link href="/auth/register" onClick={() => setOpen(false)}>
                   {t("header.signUp")}
                 </Link>
-              </Button> */}
+              </Button>
             </div>
           </nav>
         </div>

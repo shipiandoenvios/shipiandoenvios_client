@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sopy",
+  title: "Shipiando Envios",
   description:
     "Software de gestión de información tributaria contable que conecta despachos y clientes de manera fácil y eficiente, centralizando todos los datos fiscales en una única plataforma.",
   icons: {
-    icon: "/logo_sopy.png",
-    apple: "/logo_sopy.png",
-    shortcut: "/logo_sopy.png",
+    icon: "/shipiando_logo.jpeg",
+    apple: "/shipiando_logo.jpeg",
+    shortcut: "/shipiando_logo.jpeg",
   },
   manifest: "/manifest.json",
   robots: {
     index: true,
     follow: true,
   },
-  authors: [{ name: "Sopy" }],
+  authors: [{ name: "Shipiando Envios" }],
 };
 
 export default function RootLayout({
