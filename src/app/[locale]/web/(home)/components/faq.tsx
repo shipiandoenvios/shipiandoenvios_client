@@ -5,8 +5,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/packages/design-system/components/ui/accordion";
-import { Button } from "@/packages/design-system/components/ui/button";
+  Button,
+} from "@/packages/design-system/components/ui";
 import { PhoneCall, HelpCircle, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
