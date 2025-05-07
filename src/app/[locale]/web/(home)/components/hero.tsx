@@ -23,7 +23,7 @@ export const Hero = () => {
           className="bg-white text-center h-9 xl:w-[20%] xl:h-[50px] xl:text-[24px]"
           placeholder="Seguimiento de paquete"
         />
-        <button className="text-white bg-[#1D3F60] px-4 xl:w-[10%] xl:h-[50px] xl:text-[24px]">
+        <button className="text-white bg-[#1D3F60] h-9 px-4 xl:w-[10%] xl:h-[50px] xl:text-[24px]">
           Rastrear
         </button>
       </div>
