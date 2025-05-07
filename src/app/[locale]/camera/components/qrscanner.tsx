@@ -10,10 +10,15 @@ export default function QRScanner() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
-  const readerId = "qr-reader";
+  const qrReaderRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  // Obtener cámaras disponibles al montar
+  const isMobile = () =>
+    typeof window !== "undefined" &&
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
   useEffect(() => {
     const getCameras = async () => {
       try {
@@ -41,24 +46,25 @@ export default function QRScanner() {
     getCameras();
   }, []);
 
-  // Iniciar escáner o cambiar cámara
   useEffect(() => {
     const startScanner = async () => {
-      if (!selectedCameraId) return;
+      if (!selectedCameraId || !qrReaderRef.current) return;
+
+      const cameraConfig: string | MediaTrackConstraints = isMobile()
+        ? { facingMode: "environment" }
+        : selectedCameraId;
 
       try {
-        // Detener escáner si ya existe
         if (html5QrCodeRef.current?.isScanning) {
           await html5QrCodeRef.current.stop().catch(() => {});
         }
 
-        // Crear una sola instancia si no existe
         if (!html5QrCodeRef.current) {
-          html5QrCodeRef.current = new Html5Qrcode(readerId);
+          html5QrCodeRef.current = new Html5Qrcode(qrReaderRef.current.id);
         }
 
         await html5QrCodeRef.current.start(
-          selectedCameraId,
+          cameraConfig,
           {
             fps: 10,
             qrbox: { width: 270, height: 270 },
@@ -79,7 +85,6 @@ export default function QRScanner() {
     startScanner();
 
     return () => {
-      // Parar escáner sin destruir instancia
       html5QrCodeRef.current?.stop().catch(() => {});
     };
   }, [selectedCameraId, router]);
@@ -111,19 +116,27 @@ export default function QRScanner() {
       <h1 className="text-[26px] bg-[#1E4063] text-white px-3 py-1 mb-8 rounded-xl">
         Escanee el QR del paquete
       </h1>
-      <label className="mb-2 font-semibold">Selecciona una cámara:</label>
-      <select
-        className="mb-4 p-2 rounded border"
-        onChange={(e) => setSelectedCameraId(e.target.value)}
-        value={selectedCameraId || ""}
-      >
-        {cameras.map((cam) => (
-          <option key={cam.id} value={cam.id}>
-            {cam.label || `Cámara ${cam.id}`}
-          </option>
-        ))}
-      </select>
-      <div id={readerId} className="w-full max-w-md border rounded" />
+      {!isMobile() && (
+        <>
+          <label className="mb-2 font-semibold">Selecciona una cámara:</label>
+          <select
+            className="mb-4 p-2 rounded border"
+            onChange={(e) => setSelectedCameraId(e.target.value)}
+            value={selectedCameraId || ""}
+          >
+            {cameras.map((cam) => (
+              <option key={cam.id} value={cam.id}>
+                {cam.label || `Cámara ${cam.id}`}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
+      <div
+        ref={qrReaderRef}
+        id="qr-reader"
+        className="w-full max-w-md border rounded"
+      />
       <button
         onClick={() => router.push("/es/web")}
         className="text-[26px] bg-[#1E4063] text-white px-3 py-1 my-8 rounded-xl"
