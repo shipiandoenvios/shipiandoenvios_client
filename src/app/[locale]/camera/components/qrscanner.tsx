@@ -86,7 +86,7 @@ export default function QRScanner() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center">
         <p className="text-gray-700">Iniciando cámara...</p>
       </div>
     );
@@ -94,11 +94,11 @@ export default function QRScanner() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex flex-col items-center justify-center bg-gray-100">
         <p className="text-red-600 mb-4">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-4 py-2 bg-[#1E4063] text-white rounded hover:bg-[#1E4063]"
         >
           Reintentar
         </button>
