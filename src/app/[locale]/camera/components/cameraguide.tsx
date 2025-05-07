@@ -54,18 +54,18 @@ export default function CameraPermissionGuide() {
                 direcciones.
               </li>
               <li>
-                Desactivá los escudos para este sitio (puede decir “Escudo
-                activado”).
+                Desactivá los escudos para este sitio (puede decir &quot;Escudo
+                activado&quot;).
               </li>
               <li>
                 Hacé clic en el candado 🔒 junto a la barra de direcciones.
               </li>
               <li>
-                Entrá en <strong>“Configuración de sitio”</strong>.
+                Entrá en <strong>&quot;Configuración de sitio&quot;</strong>.
               </li>
               <li>
-                Buscá la sección de <strong>“Cámara”</strong> y seleccioná{" "}
-                <strong>“Permitir”</strong>.
+                Buscá la sección de <strong>&quot;Cámara&quot;</strong> y
+                seleccioná <strong>&quot;Permitir&quot;</strong>.
               </li>
               <li>Recargá la página.</li>
             </ol>
@@ -80,11 +80,11 @@ export default function CameraPermissionGuide() {
                 Hacé clic en el candado 🔒 junto a la barra de direcciones.
               </li>
               <li>
-                Seleccioná <strong>"Configuración de sitio"</strong>.
+                Seleccioná <strong>&quot;Configuración de sitio&quot;</strong>.
               </li>
               <li>
-                Buscá la opción <strong>"Cámara"</strong> y cambiá a{" "}
-                <strong>"Permitir"</strong>.
+                Buscá la opción <strong>&quot;Cámara&quot;</strong> y cambiá a{" "}
+                <strong>&quot;Permitir&quot;</strong>.
               </li>
               <li>Recargá la página.</li>
             </ol>
@@ -100,7 +100,7 @@ export default function CameraPermissionGuide() {
                 barra de direcciones.
               </li>
               <li>
-                Seleccioná <strong>"Permitir"</strong> para la cámara.
+                Seleccioná <strong>&quot;Permitir&quot;</strong> para la cámara.
               </li>
               <li>Recargá la página.</li>
             </ol>
@@ -134,11 +134,11 @@ export default function CameraPermissionGuide() {
             <ol className="list-decimal list-inside">
               <li>Hacé clic en el candado 🔒 en la barra de direcciones.</li>
               <li>
-                Seleccioná <strong>"Configuración de sitio"</strong>.
+                Seleccioná <strong>&quot;Configuración de sitio&quot;</strong>.
               </li>
               <li>
-                Buscá <strong>"Cámara"</strong> y cambiá a{" "}
-                <strong>"Permitir"</strong>.
+                Buscá <strong>&quot;Cámara&quot;</strong> y cambiá a{" "}
+                <strong>&quot;Permitir&quot;</strong>.
               </li>
               <li>
                 También podés escribir{" "}
