@@ -20,6 +20,14 @@ export type LoginFormValues = {
   rememberMe?: boolean;
 };
 
+export type RegisterFromValues = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  locaton: string;
+};
+
 // Esquema para validación de registro
 export const registerSchema = z.object({
   name: z.string().min(1, { message: "El nombre es requerido" }),
@@ -38,6 +46,8 @@ export const registerSchema = z.object({
           "La contraseña debe incluir mayúsculas, minúsculas, números y caracteres especiales",
       }
     ),
+  confirmPassword: z.string(),
+  location: z.string(),
 });
 
 // Definir el tipo de datos del formulario de registro
