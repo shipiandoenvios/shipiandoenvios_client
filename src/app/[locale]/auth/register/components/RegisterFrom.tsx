@@ -4,15 +4,25 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
-import { MoveRight, MailIcon, LockIcon, Eye, EyeOff } from "lucide-react";
-import { LoginFormValues, loginSchema } from "@/packages/auth/schemas";
+import {
+  MoveRight,
+  MailIcon,
+  LockIcon,
+  Eye,
+  EyeOff,
+  UserIcon,
+  LocateIcon,
+} from "lucide-react";
+import { RegisterFormValues, registerSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
 import { getApiUrl } from "@/packages/config";
+import { LocationAutocomplete } from "./LocationAutocomplete";
 
-export function LoginForm() {
+export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const params = useParams();
   const locale = params.locale as string; // Obtener el idioma actual
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -21,25 +31,31 @@ export function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    watch,
+    setValue,
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      rememberMe: false,
+      confirmPassword: "",
     },
   });
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(getApiUrl(`/api/auth/login`), {
+      const response = await fetch(getApiUrl(`/api/auth/register`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +67,7 @@ export function LoginForm() {
       const result = await response.json();
 
       if (!result.success) {
-        setError(result.message || "Error al iniciar sesión");
+        setError(result.message || "Error al registrarse");
         return;
       }
 
@@ -59,42 +75,10 @@ export function LoginForm() {
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Validación de trial vencido y plan inactivo
-      const nowDate = new Date();
-      const { trialEnd, planActive } = result.user;
-      if (trialEnd && new Date(trialEnd) < nowDate && !planActive) {
-        // Redirigir a acceso denegado
-        window.location.href = `/${locale}/auth/access-denied`;
-        return;
-      }
-
-      if (trialEnd && new Date(trialEnd) < nowDate && !planActive) {
-        window.location.href = `/${locale}/auth/access-denied`;
-        return;
-      }
-      let redirectPath;
-
-      switch (result.user.role) {
-        case "SUPER_ADMIN":
-          redirectPath = "/app/dashboard";
-          break;
-        case "ADMIN":
-        case "EMPRESA":
-        case "ENCARGADO":
-        case "ADMINISTRATIVO":
-        case "ANALISTA":
-        case "EMPLOYEE":
-          redirectPath = "/app/accountant/dashboard";
-          break;
-        default:
-          redirectPath = "/app/client/dashboard";
-      }
-
-      const fullPath = `/${locale}${redirectPath}`;
-      window.location.href = fullPath;
+      window.location.href = "/";
     } catch (err) {
       setError("Error de conexión. Intenta de nuevo más tarde.");
-      console.error("Error en login:", err);
+      console.error("Error en el registro:", err);
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +92,31 @@ export function LoginForm() {
         </div>
       )}
 
+      <div className="space-y-2">
+        <label
+          htmlFor="name"
+          className="block text-sm font-bold text-gray-700 var(--font-nunito)"
+        >
+          Nombre y Apellido
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <UserIcon className="h-5 w-5 text-[#1E4063]" />
+          </div>
+          <input
+            id="name"
+            {...register("name")}
+            type="name"
+            className={`pl-10 block w-full px-4 py-2.5 border ${
+              errors.name ? "border-red-300" : "border-gray-200"
+            } rounded-lg shadow-sm focus:ring-2 focus:ring-[#7dd3c8] focus:border-transparent var(--font-nunito) transition-all duration-200`}
+            placeholder="Juan Perez"
+          />
+        </div>
+        {errors.name && (
+          <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
+        )}
+      </div>
       <div className="space-y-2">
         <label
           htmlFor="email"
@@ -174,6 +183,56 @@ export function LoginForm() {
         )}
       </div>
 
+      <div className="space-y-2">
+        <label
+          htmlFor="password"
+          className="block text-sm font-bold text-gray-700 var(--font-nunito)"
+        >
+          Confirmar Contraseña
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <LockIcon className="h-5 w-5 text-[#1E4063]" />
+          </div>
+          <input
+            id="confirmPassword"
+            {...register("confirmPassword")}
+            type={showConfirmPassword ? "text" : "password"}
+            className={`pl-10 block w-full px-4 py-2.5 border ${
+              errors.confirmPassword ? "border-red-300" : "border-gray-200"
+            } rounded-lg shadow-sm focus:ring-2 focus:ring-[#7dd3c8] focus:border-transparent var(--font-nunito) transition-all duration-200`}
+            placeholder="********"
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            onClick={toggleConfirmPasswordVisibility}
+            aria-label={
+              showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+            }
+          >
+            {showConfirmPassword ? (
+              <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer" />
+            ) : (
+              <Eye className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer" />
+            )}
+          </button>
+        </div>
+        {errors.confirmPassword && (
+          <p className="text-sm text-red-600 mt-1">
+            {errors.confirmPassword.message}
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <LocationAutocomplete
+          value={watch("location")}
+          onChange={(value) => setValue("location", value)}
+          error={errors.location?.message}
+        />
+      </div>
+
       <div>
         <button
           type="submit"
@@ -184,7 +243,7 @@ export function LoginForm() {
             "Iniciando sesión..."
           ) : (
             <>
-              Iniciar sesión <MoveRight className="h-4 w-4" />
+              Registrarse <MoveRight className="h-4 w-4" />
             </>
           )}
         </button>
