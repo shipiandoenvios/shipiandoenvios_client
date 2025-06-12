@@ -34,6 +34,12 @@ export type Notification = {
   type: "success" | "error" | "info" | "warning";
 };
 
+// Tipo para el período
+export interface Period {
+  month: string;
+  year: number;
+}
+
 // Interfaz para el estado de autenticación
 interface AuthState {
   user: UserInfo | null;
@@ -93,8 +99,8 @@ export interface GlobalState {
   addNotification: (notification: Notification) => void;
   removeNotification: (id: string) => void;
 
-  currentPeriod: string;
-  setCurrentPeriod: (period: string) => void;
+  currentPeriod: Period;
+  setCurrentPeriod: (period: Period) => void;
 
   currentClientId: string | null;
   clients: ClientInfo[];
@@ -124,8 +130,8 @@ export const useGlobalStore = create<GlobalState>()(
         })),
 
       // Estado para el período
-      currentPeriod: "2025-01", // Valor predeterminado
-      setCurrentPeriod: (period: string) => set({ currentPeriod: period }),
+      currentPeriod: { month: "01", year: new Date().getFullYear() },
+      setCurrentPeriod: (period: Period) => set({ currentPeriod: period }),
 
       // Estado para clientes
       currentClientId: null,
@@ -151,34 +157,17 @@ export const useGlobalStore = create<GlobalState>()(
               "Content-Type": "application/json",
             },
             credentials: "include",
-            cache: "no-store",
           });
 
           if (!response.ok) {
-            // En lugar de lanzar un error, manejamos el estado de error pero devolvemos un array vacío
-            console.error(`[GlobalStore] Error HTTP: ${response.status}`);
-            set({
-              clients: [], // Array vacío en caso de error
-              isLoadingClients: false,
-              loadError: null, // No mostramos el error al usuario
-            });
-            return;
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
 
           const data = await response.json();
-
-          set({
-            clients: data.clients || [], // Nos aseguramos de que siempre sea un array
-            isLoadingClients: false,
-          });
+          set({ clients: data.clients || [], isLoadingClients: false });
         } catch (error) {
-          console.error("[GlobalStore] Error cargando clientes:", error);
-          // En caso de error, simplemente establecemos un array vacío de clientes
-          set({
-            clients: [],
-            loadError: null, // No mostramos el error al usuario
-            isLoadingClients: false,
-          });
+          console.error("Error loading clients:", error);
+          set({ loadError: "Error loading clients", isLoadingClients: false });
         }
       },
 
@@ -197,12 +186,11 @@ export const useGlobalStore = create<GlobalState>()(
           });
 
           if (!response.ok) {
-            // En lugar de lanzar un error, manejamos el estado de error pero devolvemos un array vacío
             console.error(`[GlobalStore] Error HTTP: ${response.status}`);
             set({
-              clients: [], // Array vacío en caso de error
+              clients: [],
               isLoadingClients: false,
-              loadError: null, // No mostramos el error al usuario
+              loadError: null,
             });
             return;
           }
@@ -215,15 +203,14 @@ export const useGlobalStore = create<GlobalState>()(
           );
 
           set({
-            clients: data.clients || [], // Nos aseguramos de que siempre sea un array
+            clients: data.clients || [],
             isLoadingClients: false,
           });
         } catch (error) {
           console.error("[GlobalStore] Error cargando clientes:", error);
-          // En caso de error, simplemente establecemos un array vacío de clientes
           set({
             clients: [],
-            loadError: null, // No mostramos el error al usuario
+            loadError: null,
             isLoadingClients: false,
           });
         }

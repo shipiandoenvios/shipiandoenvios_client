@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const Pricing = async () => {
+const Pricing = () => {
   return (
     <div className="w-full py-24 lg:py-32 relative overflow-hidden">
       {/* Elementos decorativos sutiles */}

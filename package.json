@@ -32,6 +32,7 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-switch": "^1.1.4",
     "@radix-ui/react-tabs": "^1.1.4",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@radix-ui/themes": "^3.2.1",
     "@react-google-maps/api": "^2.20.6",
     "@sentry/nextjs": "^9.11.0",
@@ -62,16 +63,18 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.17",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "postcss": "^8.4.35",
     "prisma": "^5.22.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
     "typescript": "^5"
   }

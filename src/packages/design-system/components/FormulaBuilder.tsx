@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   validateFormula,
   evaluateFormula,
@@ -244,7 +244,7 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
   }, [fields]);
 
   // Calcular la complejidad de la fórmula
-  const calculateComplexity = (formula: string): number => {
+  const calculateComplexity = useCallback(() => {
     if (!formula.trim()) return 0;
 
     let complexity = 0;
@@ -277,8 +277,9 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     complexity += fieldNamesUsed.size * 5;
 
     // Normalizar a un valor entre 0 y 100
-    return Math.min(100, complexity);
-  };
+    const result = Math.min(100, complexity);
+    setFormulaComplexity(result);
+  }, [formula, fields]);
 
   // Validar la fórmula cuando cambie
   useEffect(() => {
@@ -287,7 +288,7 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     setValidationError(error || null);
 
     // Calcular complejidad de la fórmula
-    setFormulaComplexity(calculateComplexity(formula));
+    calculateComplexity();
 
     // Mostrar toast con error de validación
     if (error && formula.trim()) {
@@ -324,7 +325,7 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
 
     onChange(formula, isValid);
-  }, [formula, fields, onChange, previewValues]);
+  }, [formula, fields, onChange, previewValues, calculateComplexity]);
 
   // Actualizar sugerencias basadas en la posición del cursor
   useEffect(() => {
@@ -553,6 +554,10 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
       month: "2-digit",
     });
   };
+
+  useEffect(() => {
+    calculateComplexity();
+  }, [calculateComplexity]);
 
   return (
     <div className="space-y-4">

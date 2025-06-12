@@ -17,6 +17,14 @@ import { RegisterFormValues, registerSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
 import { getApiUrl } from "@/packages/config";
 import { LocationAutocomplete } from "./LocationAutocomplete";
+import { UserInfo } from "@/store/store";
+
+interface RegisterResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: UserInfo;
+}
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,10 +72,15 @@ export function RegisterForm() {
         credentials: "include",
       });
 
-      const result = await response.json();
+      const result = await response.json() as RegisterResponse;
 
       if (!result.success) {
         setError(result.message || "Error al registrarse");
+        return;
+      }
+
+      if (!result.token || !result.user) {
+        setError("Respuesta inválida del servidor");
         return;
       }
 

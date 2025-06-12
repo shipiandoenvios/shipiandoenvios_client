@@ -10,9 +10,11 @@ import {
   SelectValue,
 } from "@/packages/design-system/components/ui/select";
 import { CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function PeriodSelector() {
-  const { setCurrentPeriod } = useGlobalStore();
+  const { setCurrentPeriod, currentPeriod } = useGlobalStore();
 
   // Obtener el año y mes actual para validación
   const today = new Date();
@@ -29,36 +31,35 @@ export function PeriodSelector() {
   );
 
   const months = [
-    { value: "01", label: "Enero" },
-    { value: "02", label: "Febrero" },
-    { value: "03", label: "Marzo" },
-    { value: "04", label: "Abril" },
-    { value: "05", label: "Mayo" },
-    { value: "06", label: "Junio" },
-    { value: "07", label: "Julio" },
-    { value: "08", label: "Agosto" },
-    { value: "09", label: "Septiembre" },
-    { value: "10", label: "Octubre" },
-    { value: "11", label: "Noviembre" },
-    { value: "12", label: "Diciembre" },
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
 
-  // Establecer siempre el periodo actual al montar el componente
+  // Establecer siempre el periodo actual al montar
   useEffect(() => {
     // Siempre usamos el año y mes actuales al cargar la página
     setSelectedYear(currentYear.toString());
     setSelectedMonth(currentMonth);
 
     // Actualizar el store con el periodo actual
-    setCurrentPeriod(`${currentYear}-${currentMonth}`);
-  }, []);
+    setCurrentPeriod({ month: currentMonth, year: currentYear });
+  }, [currentMonth, currentYear, setCurrentPeriod]);
 
   // Actualizar el período en el store cuando cambia la selección
   useEffect(() => {
-    if (selectedYear && selectedMonth) {
-      setCurrentPeriod(`${selectedYear}-${selectedMonth}`);
-    }
-  }, [selectedYear, selectedMonth, setCurrentPeriod]);
+    setSelectedYear(currentPeriod.year.toString());
+    setSelectedMonth(currentPeriod.month);
+  }, [currentPeriod]);
 
   // Función para verificar si un mes debe estar deshabilitado
   const isMonthDisabled = (monthValue: string) => {
@@ -73,7 +74,6 @@ export function PeriodSelector() {
   const handleYearChange = (year: string) => {
     setSelectedYear(year);
 
-    // Si seleccionamos el año actual y el mes seleccionado es mayor al actual
     if (
       year === currentYear.toString() &&
       parseInt(selectedMonth) > parseInt(currentMonth)
@@ -82,8 +82,28 @@ export function PeriodSelector() {
     }
   };
 
+  const handlePreviousMonth = () => {
+    const currentIndex = months.indexOf(selectedMonth);
+    if (currentIndex === 0) {
+      setSelectedMonth(months[11]);
+      setSelectedYear((parseInt(selectedYear) - 1).toString());
+    } else {
+      setSelectedMonth(months[currentIndex - 1]);
+    }
+  };
+
+  const handleNextMonth = () => {
+    const currentIndex = months.indexOf(selectedMonth);
+    if (currentIndex === 11) {
+      setSelectedMonth(months[0]);
+      setSelectedYear((parseInt(selectedYear) + 1).toString());
+    } else {
+      setSelectedMonth(months[currentIndex + 1]);
+    }
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-1 lg:gap-2 w-full lg:w-auto lg:mr-2">
+    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2">
       <div className="flex items-center mb-0.5 lg:mb-0 lg:mr-1">
         <CalendarIcon className="hidden lg:inline h-4 w-4 text-[#0F8E95]" />
         <span className="hidden lg:inline text-sm font-medium ml-1 text-[#0F8E95]">
@@ -92,41 +112,58 @@ export function PeriodSelector() {
       </div>
 
       <div className="flex w-full lg:w-auto gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handlePreviousMonth}
+          className="h-8 w-8"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
           <SelectTrigger className="w-full lg:w-[130px] h-9 bg-white border-gray-200 hover:border-[#EFC74F] focus:ring-[#EFC74F] focus:border-[#EFC74F] rounded-lg shadow-sm transition-all duration-200">
-            <SelectValue placeholder="Mes" className="text-gray-700" />
+            <SelectValue placeholder="Mes" />
           </SelectTrigger>
-          <SelectContent className="bg-white border border-gray-100 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+          <SelectContent>
             {months.map((month) => (
               <SelectItem
-                key={month.value}
-                value={month.value}
-                disabled={isMonthDisabled(month.value)}
+                key={month}
+                value={month}
+                disabled={isMonthDisabled(month)}
                 className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer rounded data-[state=checked]:bg-[#0F8E95]/10 data-[state=checked]:text-[#0F8E95] data-[state=checked]:font-medium"
               >
-                {month.label}
+                {month}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Select value={selectedYear} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-full lg:w-[90px] h-9 bg-white border-gray-200 hover:border-[#EFC74F] focus:ring-[#EFC74F] focus:border-[#EFC74F] rounded-lg shadow-sm transition-all duration-200">
-            <SelectValue placeholder="Año" className="text-gray-700" />
+          <SelectTrigger className="w-full lg:w-[100px] h-9 bg-white border-gray-200 hover:border-[#EFC74F] focus:ring-[#EFC74F] focus:border-[#EFC74F] rounded-lg shadow-sm transition-all duration-200">
+            <SelectValue placeholder="Año" />
           </SelectTrigger>
-          <SelectContent className="bg-white border border-gray-100 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+          <SelectContent>
             {availableYears.map((year) => (
               <SelectItem
                 key={year}
                 value={year}
-                disabled={parseInt(year) > currentYear}
-                className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer rounded data-[state=checked]:bg-[#EFC74F]/10 data-[state=checked]:text-[#EFC74F] data-[state=checked]:font-medium"
+                className="hover:bg-gray-50 focus:bg-gray-50 cursor-pointer rounded data-[state=checked]:bg-[#0F8E95]/10 data-[state=checked]:text-[#0F8E95] data-[state=checked]:font-medium"
               >
                 {year}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNextMonth}
+          className="h-8 w-8"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

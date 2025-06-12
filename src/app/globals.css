@@ -1,39 +1,276 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Tema claro (default) */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #FFB800;
-  --primary-hover: #FFE01B;
-  --secondary: #7dd3c8;
-  --tertiary: #9747FF;
-  --border-light: rgba(229, 231, 235, 0.8);
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Colores principales de SHIPIANDO */
+    --primary: 210 43% 30%;
+    --primary-hover: 210 43% 40%;
+    --secondary: 210 38% 95%;
+    --tertiary: 210 60% 50%;
+
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: 210 43% 30%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --border-light: 229 231 235;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 210 43% 30%;
+    --radius: 0.75rem;
+
+    /* Colores para gráficos */
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Colores específicos de SHIPIANDO */
+    --logistics-primary: 210 43% 30%;
+    --logistics-secondary: 210 38% 95%;
+    --logistics-dark: 210 50% 20%;
+    --logistics-light: 210 30% 90%;
+    --logistics-accent: 210 60% 50%;
+
+    /* Sidebar */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 210 43% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 38% 95%;
+    --sidebar-accent-foreground: 210 43% 30%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 210 43% 30%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Colores principales de SHIPIANDO */
+    --primary: 210 43% 40%;
+    --primary-hover: 210 43% 50%;
+    --secondary: 210 38% 15%;
+    --tertiary: 210 60% 60%;
+
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --border-light: 64 64 64;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 210 43% 40%;
+
+    /* Colores para gráficos */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    /* Colores específicos de SHIPIANDO */
+    --logistics-primary: 210 43% 40%;
+    --logistics-secondary: 210 38% 15%;
+    --logistics-dark: 210 50% 15%;
+    --logistics-light: 210 30% 50%;
+    --logistics-accent: 210 60% 60%;
+
+    /* Sidebar */
+    --sidebar: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 43% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 210 43% 40%;
+  }
 }
 
-/* Tema oscuro cuando se aplica la clase dark */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --primary: #FFE01B;
-  --primary-hover: #FFB800;
-  --secondary: #2a9d8f;
-  --tertiary: #b47aff;
-  --border-light: rgba(64, 64, 64, 0.8);
-}
-
-/* Aplicar variables a todo el documento */
-html, body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
+@layer base {
+  * {
+    @apply border-[hsl(var(--border))];
+  }
+  body {
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
 }
 
 /* Transición suave al cambiar de tema */
 *, *::before, *::after {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: 200ms;
+}
+
+/* Estilos adicionales para SHIPIANDO */
+.logistics-gradient {
+  background: linear-gradient(135deg, rgba(43, 77, 111, 0.9) 0%, rgba(29, 53, 77, 0.95) 100%);
+}
+
+.logistics-hero {
+  background-image: url("/images/logistics-hero.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.logistics-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(43, 77, 111, 0.85) 0%, rgba(29, 53, 77, 0.9) 100%);
+}
+
+.logistics-card {
+  @apply bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow;
+}
+
+.logistics-button-primary {
+  @apply bg-[hsl(var(--logistics-primary))] hover:bg-[hsl(var(--logistics-dark))] text-white font-medium;
+}
+
+.logistics-button-secondary {
+  @apply bg-white hover:bg-[hsl(var(--logistics-light))] text-[hsl(var(--logistics-primary))] border border-[hsl(var(--logistics-primary))] font-medium;
+}
+
+.logistics-text-primary {
+  @apply text-[hsl(var(--logistics-primary))];
+}
+
+.logistics-bg-primary {
+  @apply bg-[hsl(var(--logistics-primary))];
+}
+
+.logistics-icon-circle {
+  @apply bg-[hsl(var(--logistics-primary))] text-white p-4 rounded-full w-16 h-16 flex items-center justify-center;
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Estilos para estados de envío */
+.status-pending {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.status-in-transit {
+  @apply bg-[hsl(var(--logistics-light))] text-[hsl(var(--logistics-dark))] border-[hsl(var(--logistics-primary))];
+}
+
+.status-delivered {
+  @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.status-cancelled {
+  @apply bg-red-100 text-red-800 border-red-200;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-padding {
+    @apply px-4 py-3;
+  }
+
+  .mobile-text {
+    @apply text-sm;
+  }
+}
+
+/* Sidebar específicos */
+.sidebar-header {
+  @apply bg-[hsl(var(--logistics-primary))] text-white;
+}
+
+.sidebar-item-active {
+  @apply bg-[hsl(var(--logistics-primary))] text-white;
+}
+
+.sidebar-item-hover {
+  @apply hover:bg-[hsl(var(--logistics-primary))/10];
+}
+
+/* Nuevos estilos basados en la imagen */
+.logistics-nav {
+  @apply bg-[hsl(var(--logistics-primary))] text-white py-4;
+}
+
+.logistics-nav-item {
+  @apply hover:bg-[hsl(var(--logistics-dark))] px-4 py-2 rounded transition-colors;
+}
+
+.logistics-search-box {
+  @apply bg-white rounded-l-lg border-r border-gray-200 px-4 py-2 focus:outline-none;
+}
+
+.logistics-search-button {
+  @apply bg-[hsl(var(--logistics-primary))] text-white rounded-r-lg px-6 py-2 font-medium hover:bg-[hsl(var(--logistics-dark))] transition-colors;
+}
+
+.logistics-section-title {
+  @apply text-3xl font-bold text-center mb-10 text-[hsl(var(--logistics-dark))];
+}
+
+.logistics-feature-circle {
+  @apply bg-[hsl(var(--logistics-primary))] text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4;
+}
+
+.logistics-feature-title {
+  @apply text-xl font-semibold text-center mb-2;
+}
+
+.logistics-feature-text {
+  @apply text-center text-gray-600;
+}
+
+.logistics-cta-button {
+  @apply bg-[hsl(var(--logistics-primary))] text-white py-3 px-8 rounded-md font-medium hover:bg-[hsl(var(--logistics-dark))] transition-colors w-full text-center;
+}
+
+.logistics-footer {
+  @apply bg-[hsl(var(--logistics-primary))] text-white py-6;
 }
