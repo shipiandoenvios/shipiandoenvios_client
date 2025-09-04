@@ -12,23 +12,6 @@ export default function AccessDenied() {
   const handleLogoutAndRedirect = async () => {
     setIsRedirecting(true);
     logout();
-    // try {
-    //   const response = await fetch(getApiUrl("/api/auth/logout"), {
-    //     method: "POST",
-    //     credentials: "include",
-    //   });
-
-    //   if (!response.ok) {
-    //     console.error("Error en logout:", await response.text());
-    //   }
-    // } catch (error) {
-    //   console.error("Error al cerrar sesión:", error);
-    // } finally {
-    //   setTimeout(() => {
-    //     const locale = window.location.pathname.split("/")[1] || "es";
-    //     window.location.href = `/${locale}/web/pricing`;
-    //   }, 100);
-    // }
   };
 
   return (

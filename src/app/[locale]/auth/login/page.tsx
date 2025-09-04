@@ -14,9 +14,7 @@ export default function Login() {
   const locale = pathname.split("/")[1];
 
   useEffect(() => {
-    // Verificar si el usuario está logueado
     if (user) {
-      // Redirigir según el rol
       if (user.role === "USER") {
         router.push(`/${locale}/app/client/dashboard`);
       } else if (user.role === "SUPER_ADMIN") {

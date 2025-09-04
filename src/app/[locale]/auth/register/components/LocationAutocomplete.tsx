@@ -44,7 +44,6 @@ export function LocationAutocomplete({ value = "", onChange, error }: LocationAu
     if (autocomplete) {
       const place = autocomplete.getPlace() as Place;
       if (place.formatted_address) {
-        // Verificar si la ubicación está en Argentina
         const isInArgentina = place.address_components?.some(
           (component) =>
             component.types.includes("country") && component.long_name === "Argentina"

@@ -2,13 +2,7 @@
 
 import { useState } from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { WarehouseSidebar } from "@/components/warehouse-sidebar"
-import { WarehouseReceptionContent } from "@/components/warehouse-reception-content"
-import { WarehouseInventoryContent } from "@/components/warehouse-inventory-content"
-import { WarehouseDispatchContent } from "@/components/warehouse-dispatch-content"
-import { WarehouseTrackingContent } from "@/components/warehouse-tracking-content"
-import { WarehouseSettingsContent } from "@/components/warehouse-settings-content"
-import { WarehouseDashboardContent } from "@/components/warehouse-dashboard-content"
+import { WarehouseDashboardContent, WarehouseDispatchContent, WarehouseInventoryContent, WarehouseReceptionContent, WarehouseSettingsContent, WarehouseSidebar, WarehouseTrackingContent } from "./components"
 import { Warehouse } from "lucide-react"
 
 export default function WarehousePanel() {

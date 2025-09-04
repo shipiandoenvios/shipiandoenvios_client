@@ -22,7 +22,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const params = useParams();
-  const locale = params.locale as string; // Obtener el idioma actual
+  const locale = params.locale as string;
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const {

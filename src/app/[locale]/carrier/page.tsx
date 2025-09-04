@@ -2,12 +2,7 @@
 
 import { useState } from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { CarrierSidebar } from "@/components/carrier-sidebar"
-import { CarrierDashboardContent } from "@/components/carrier-dashboard-content"
-import { CarrierRouteContent } from "@/components/carrier-route-content"
-import { CarrierPickupContent } from "@/components/carrier-pickup-content"
-import { CarrierDeliveryContent } from "@/components/carrier-delivery-content"
-import { CarrierHistoryContent } from "@/components/carrier-history-content"
+import { CarrierDashboardContent, CarrierDeliveryContent, CarrierHistoryContent, CarrierPickupContent, CarrierRouteContent, CarrierSidebar } from "./components"
 import { Truck } from "lucide-react"
 
 export default function CarrierPanel() {
@@ -35,7 +30,6 @@ export default function CarrierPanel() {
       <div className="flex min-h-screen w-full bg-gray-50">
         <CarrierSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
         <main className="flex-1">
-          {/* Mobile Header */}
           <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="h-8 w-8" />

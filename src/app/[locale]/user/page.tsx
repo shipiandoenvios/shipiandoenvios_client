@@ -1,13 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { UserSidebar } from "@/components/user-sidebar"
-import { UserDashboardContent } from "@/components/user-dashboard-content"
-import { UserPackagesContent } from "@/components/user-packages-content"
-import { UserAddressesContent } from "@/components/user-addresses-content"
-import { UserProfileContent } from "@/components/user-profile-content"
-import { UserTrackingContent } from "@/components/user-tracking-content"
-import { UserDetailContent } from "@/components/user-detail-content"
+import { UserAddressesContent, UserDashboardContent, UserDetailContent, UserPackagesContent, UserProfileContent, UserSidebar, UserTrackingContent } from "./components"
 import { Package, Menu } from "lucide-react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 
