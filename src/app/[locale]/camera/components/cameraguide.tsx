@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+type BrowserType = "Brave" | "Opera" | "Firefox" | "Safari" | "Chrome" | "Desconocido";
+
+interface BraveNavigator extends Navigator {
+  brave?: {
+    isBrave: boolean;
+  };
+}
+
 export default function CameraPermissionGuide() {
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const [browser, setBrowser] = useState<string | null>(null);
+  const [browser, setBrowser] = useState<BrowserType | null>(null);
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -22,17 +30,14 @@ export default function CameraPermissionGuide() {
 
     const detectBrowser = () => {
       const ua = navigator.userAgent;
+      const nav = navigator as BraveNavigator;
 
-      if (
-        /Brave/.test(navigator.userAgent) ||
-        (window.navigator as any).brave?.isBrave
-      ) {
+      if (/Brave/.test(ua) || nav.brave?.isBrave) {
         return setBrowser("Brave");
       }
       if (/OPR\//.test(ua) || ua.includes("Opera")) return setBrowser("Opera");
       if (/Firefox\//.test(ua)) return setBrowser("Firefox");
-      if (/Safari\//.test(ua) && !/Chrome\//.test(ua))
-        return setBrowser("Safari");
+      if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) return setBrowser("Safari");
       if (/Chrome\//.test(ua)) return setBrowser("Chrome");
 
       return setBrowser("Desconocido");

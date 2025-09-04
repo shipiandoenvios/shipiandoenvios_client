@@ -10,6 +10,17 @@ interface LocationAutocompleteProps {
   error?: string;
 }
 
+interface AddressComponent {
+  long_name: string;
+  short_name: string;
+  types: string[];
+}
+
+interface Place {
+  formatted_address?: string;
+  address_components?: AddressComponent[];
+}
+
 const libraries: ("places")[] = ["places"];
 
 export function LocationAutocomplete({ value = "", onChange, error }: LocationAutocompleteProps) {
@@ -31,9 +42,8 @@ export function LocationAutocomplete({ value = "", onChange, error }: LocationAu
 
   const onPlaceChanged = () => {
     if (autocomplete) {
-      const place = autocomplete.getPlace();
+      const place = autocomplete.getPlace() as Place;
       if (place.formatted_address) {
-        // Verificar si la ubicación está en Argentina
         const isInArgentina = place.address_components?.some(
           (component) =>
             component.types.includes("country") && component.long_name === "Argentina"

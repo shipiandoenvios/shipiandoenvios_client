@@ -77,7 +77,6 @@ export function validateFormula(
 
     // Intentar evaluar la expresión con valores de prueba
     const testFormula = createEvaluableExpression(expression, fieldNames, 1);
-    // eslint-disable-next-line no-new-func
     new Function(testFormula)();
 
     return { isValid: true };
@@ -351,7 +350,6 @@ export function evaluateFormula(
     console.log("⚙️ Expresión evaluable final:", processedFormula);
 
     // Evaluar la expresión procesada
-    // eslint-disable-next-line no-eval
     const result = eval(processedFormula);
 
     // Verificar si el resultado es un número válido

@@ -8,13 +8,21 @@ import { MoveRight, MailIcon, LockIcon, Eye, EyeOff } from "lucide-react";
 import { LoginFormValues, loginSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
 import { getApiUrl } from "@/packages/config";
+import { UserInfo } from "@/store/store";
+
+interface LoginResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: UserInfo;
+}
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const params = useParams();
-  const locale = params.locale as string; // Obtener el idioma actual
+  const locale = params.locale as string;
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
@@ -48,10 +56,15 @@ export function LoginForm() {
         credentials: "include",
       });
 
-      const result = await response.json();
+      const result = await response.json() as LoginResponse;
 
       if (!result.success) {
         setError(result.message || "Error al iniciar sesión");
+        return;
+      }
+
+      if (!result.token || !result.user) {
+        setError("Respuesta inválida del servidor");
         return;
       }
 
@@ -68,10 +81,6 @@ export function LoginForm() {
         return;
       }
 
-      if (trialEnd && new Date(trialEnd) < nowDate && !planActive) {
-        window.location.href = `/${locale}/auth/access-denied`;
-        return;
-      }
       let redirectPath;
 
       switch (result.user.role) {

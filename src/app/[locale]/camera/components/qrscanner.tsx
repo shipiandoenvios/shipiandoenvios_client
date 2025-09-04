@@ -4,8 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { useRouter } from "next/navigation";
 
+interface Camera {
+  id: string;
+  label: string;
+}
+
 export default function QRScanner() {
-  const [cameras, setCameras] = useState<any[]>([]);
+  const [cameras, setCameras] = useState<Camera[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

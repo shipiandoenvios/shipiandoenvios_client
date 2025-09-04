@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   validateFormula,
   evaluateFormula,
@@ -40,7 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-// Componente Progress personalizado si no existe en el design system
+
 const Progress = ({
   value,
   className,
@@ -82,7 +82,7 @@ interface FormulaHistoryItem {
 
 const MAX_HISTORY_ITEMS = 5;
 
-// Función para resaltar partes de la fórmula
+
 const highlightFormula = (
   formula: string,
   fields: Field[]
@@ -104,7 +104,7 @@ const highlightFormula = (
     "min",
   ];
 
-  // Dividir la fórmula en tokens
+
   const result: React.ReactNode[] = [];
   let currentToken = "";
   let currentType: "field" | "operator" | "function" | "number" | "text" =
@@ -143,7 +143,7 @@ const highlightFormula = (
   for (let i = 0; i < formula.length; i++) {
     const char = formula[i];
 
-    // Detectar operadores
+
     if (operators.includes(char)) {
       addToken();
       result.push(
@@ -154,7 +154,7 @@ const highlightFormula = (
       continue;
     }
 
-    // Detectar números
+
     if (/[0-9.]/.test(char)) {
       if (currentType !== "number") {
         addToken();
@@ -164,11 +164,11 @@ const highlightFormula = (
       continue;
     }
 
-    // Detectar funciones y campos (empiezan con letras)
+
     if (/[a-zA-Z_]/.test(char)) {
       if (currentType !== "field" && currentType !== "function") {
         addToken();
-        // Verificamos si es parte de una función conocida
+
         const possibleFunction =
           formula.substring(i).match(/^([a-zA-Z_][a-zA-Z0-9_]*)/)?.[1] || "";
         if (functions.some((f) => f === possibleFunction)) {
@@ -183,7 +183,7 @@ const highlightFormula = (
       continue;
     }
 
-    // Espacios y otros caracteres
+
     if (/\s/.test(char)) {
       addToken();
       result.push(<span key={result.length}>{char}</span>);
@@ -197,7 +197,7 @@ const highlightFormula = (
     }
   }
 
-  // Añadir el último token
+
   addToken();
 
   return <>{result}</>;
@@ -222,7 +222,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
   const [showHighlightedView, setShowHighlightedView] = useState<boolean>(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Cargar historial de fórmulas del localStorage
   useEffect(() => {
     const savedHistory = localStorage.getItem("formulaHistory");
     if (savedHistory) {
@@ -234,39 +233,34 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   }, []);
 
-  // Generar valores de ejemplo para la vista previa
   useEffect(() => {
     const newPreviewValues = fields.map((field) => ({
       fieldId: field.name,
-      value: Math.floor(Math.random() * 10) + 1, // Valores aleatorios de 1 a 10
+      value: Math.floor(Math.random() * 10) + 1,
     }));
     setPreviewValues(newPreviewValues);
   }, [fields]);
 
-  // Calcular la complejidad de la fórmula
-  const calculateComplexity = (formula: string): number => {
+
+  const calculateComplexity = useCallback(() => {
     if (!formula.trim()) return 0;
 
     let complexity = 0;
 
-    // Contar operadores
     const operatorsCount = (formula.match(/[+\-*/]/g) || []).length;
     complexity += operatorsCount * 10;
 
-    // Contar paréntesis (indicador de agrupación)
     const parenthesesPairs = Math.min(
       (formula.match(/\(/g) || []).length,
       (formula.match(/\)/g) || []).length
     );
     complexity += parenthesesPairs * 15;
 
-    // Contar funciones
     const functionCalls = (
       formula.match(/\b(sin|cos|tan|sqrt|abs|round|max|min)\(/g) || []
     ).length;
     complexity += functionCalls * 20;
 
-    // Contar campos utilizados
     const fieldNamesUsed = new Set();
     fields.forEach((field) => {
       const regex = new RegExp(`\\b${field.name}\\b`, "g");
@@ -276,20 +270,17 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     });
     complexity += fieldNamesUsed.size * 5;
 
-    // Normalizar a un valor entre 0 y 100
-    return Math.min(100, complexity);
-  };
+    const result = Math.min(100, complexity);
+    setFormulaComplexity(result);
+  }, [formula, fields]);
 
-  // Validar la fórmula cuando cambie
   useEffect(() => {
     const fieldNames = fields.map((field) => field.name);
     const { isValid, error } = validateFormula(formula, fieldNames);
     setValidationError(error || null);
 
-    // Calcular complejidad de la fórmula
-    setFormulaComplexity(calculateComplexity(formula));
+    calculateComplexity();
 
-    // Mostrar toast con error de validación
     if (error && formula.trim()) {
       toast.error("Error en la fórmula", {
         description: error,
@@ -297,7 +288,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
       });
     }
 
-    // Calcular el resultado de la vista previa si la fórmula es válida
     if (isValid && formula.trim() !== "") {
       try {
         const valueMap = previewValues.reduce((acc, item) => {
@@ -305,14 +295,12 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
           return acc;
         }, {} as Record<string, number>);
 
-        // Convertir los previewValues a un formato compatible con la nueva función
         const fieldsForEval = fields.map((field) => ({
           id: field.name,
           name: field.label,
           type: "number",
         }));
 
-        // Utilizar la nueva firma de evaluateFormula con los tres parámetros
         const result = evaluateFormula(formula, fieldsForEval, valueMap);
         setPreviewResult(result);
       } catch (err) {
@@ -322,11 +310,10 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     } else {
       setPreviewResult(null);
     }
-
     onChange(formula, isValid);
-  }, [formula, fields, onChange, previewValues]);
+  }, [formula, fields, onChange, previewValues, calculateComplexity]);
 
-  // Actualizar sugerencias basadas en la posición del cursor
+
   useEffect(() => {
     if (inputRef.current) {
       const currentTextBeforeCursor = formula.substring(0, cursorPosition);
@@ -335,47 +322,38 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
         currentTextBeforeCursor,
         fieldNames
       );
-
       setSuggestions(newSuggestions);
       setShowSuggestions(newSuggestions.length > 0);
     }
   }, [formula, cursorPosition, fields]);
 
-  // Guardar la fórmula en el historial cuando sea válida
   const saveToHistory = (formulaText: string) => {
     if (!formulaText.trim() || validationError) return;
-
     setFormulaHistory((prev) => {
-      // Comprobar si la fórmula ya está en el historial
+
       const exists = prev.some((item) => item.formula === formulaText);
       if (exists) return prev;
 
-      // Añadir la nueva fórmula al inicio y limitar el tamaño
+
       const newHistory = [
         { formula: formulaText, timestamp: Date.now() },
         ...prev.filter((item) => item.formula !== formulaText),
       ].slice(0, MAX_HISTORY_ITEMS);
 
-      // Guardar en localStorage
-      localStorage.setItem("formulaHistory", JSON.stringify(newHistory));
 
+      localStorage.setItem("formulaHistory", JSON.stringify(newHistory));
       return newHistory;
     });
   };
 
-  // Manejar la inserción de campo
   const handleInsertField = (fieldName: string) => {
     const newFormula =
       formula.substring(0, cursorPosition) +
       fieldName +
       formula.substring(cursorPosition);
     setFormula(newFormula);
-
-    // Actualizar la posición del cursor después de la inserción
     const newPosition = cursorPosition + fieldName.length;
     setCursorPosition(newPosition);
-
-    // Enfocar y establecer la posición del cursor en el input
     if (inputRef.current) {
       inputRef.current.focus();
       setTimeout(() => {
@@ -387,9 +365,7 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   };
 
-  // Manejar la inserción de operador
   const handleInsertOperator = (operator: string) => {
-    // Agregar espacio alrededor de los operadores para mejorar la legibilidad
     const operatorWithSpace =
       operator === "(" || operator === ")" ? operator : ` ${operator} `;
     const newFormula =
@@ -398,11 +374,9 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
       formula.substring(cursorPosition);
     setFormula(newFormula);
 
-    // Actualizar posición del cursor
     const newPosition = cursorPosition + operatorWithSpace.length;
     setCursorPosition(newPosition);
 
-    // Enfocar y establecer la posición del cursor
     if (inputRef.current) {
       inputRef.current.focus();
       setTimeout(() => {
@@ -414,7 +388,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   };
 
-  // Manejar la inserción de función
   const handleInsertFunction = (func: string) => {
     const funcWithParen = `${func}(`;
     const newFormula =
@@ -422,12 +395,9 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
       funcWithParen +
       formula.substring(cursorPosition);
     setFormula(newFormula);
-
-    // Actualizar posición del cursor dentro de los paréntesis
     const newPosition = cursorPosition + funcWithParen.length;
     setCursorPosition(newPosition);
 
-    // Enfocar y establecer la posición del cursor
     if (inputRef.current) {
       inputRef.current.focus();
       setTimeout(() => {
@@ -439,15 +409,11 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   };
 
-  // Manejar el cambio en el input de la fórmula
   const handleFormulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormula(e.target.value);
     setCursorPosition(e.target.selectionStart || 0);
   };
-
-  // Manejar el clic o selección de una de las sugerencias
   const handleSuggestionClick = (suggestion: string) => {
-    // Encontrar el inicio de la palabra actual
     const textBeforeCursor = formula.substring(0, cursorPosition);
     const lastSpacePos = Math.max(
       textBeforeCursor.lastIndexOf(" "),
@@ -458,25 +424,18 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
       textBeforeCursor.lastIndexOf("("),
       textBeforeCursor.lastIndexOf(")")
     );
-
     const wordStart = lastSpacePos + 1;
-
-    // Reemplazar la palabra actual con la sugerencia
     const newFormula =
       formula.substring(0, wordStart) +
       suggestion +
       formula.substring(cursorPosition);
-
     setFormula(newFormula);
 
-    // Actualizar posición del cursor
     const newPosition = wordStart + suggestion.length;
     setCursorPosition(newPosition);
 
-    // Cerrar menú de sugerencias
     setShowSuggestions(false);
 
-    // Enfocar y establecer la posición del cursor
     if (inputRef.current) {
       inputRef.current.focus();
       setTimeout(() => {
@@ -488,10 +447,8 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   };
 
-  // Aplicar una fórmula desde el historial
   const applyHistoryFormula = (historyFormula: string) => {
     setFormula(historyFormula);
-    // Poner el cursor al final de la fórmula
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
@@ -502,14 +459,12 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }, 0);
   };
 
-  // Limpiar el historial de fórmulas
   const clearHistory = () => {
     setFormulaHistory([]);
     localStorage.removeItem("formulaHistory");
     toast.success("Historial limpiado");
   };
 
-  // Guardar la fórmula actual en el historial
   const saveCurrentFormula = () => {
     if (formula.trim() && !validationError) {
       saveToHistory(formula);
@@ -519,21 +474,18 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   };
 
-  // Manejar el cambio en un valor de la vista previa
   const handlePreviewValueChange = (fieldId: string, value: number) => {
     setPreviewValues((prev) =>
       prev.map((item) => (item.fieldId === fieldId ? { ...item, value } : item))
     );
   };
 
-  // Mantener el seguimiento de la posición del cursor
   const handleCursorPositionChange = (
     e: React.SyntheticEvent<HTMLInputElement>
   ) => {
     setCursorPosition(e.currentTarget.selectionStart || 0);
   };
 
-  // Limpiar la fórmula actual
   const clearFormula = () => {
     setFormula("");
     setValidationError(null);
@@ -544,7 +496,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
     }
   };
 
-  // Formatear fecha para el historial
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp).toLocaleString("es-ES", {
       hour: "2-digit",
@@ -553,6 +504,10 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
       month: "2-digit",
     });
   };
+
+  useEffect(() => {
+    calculateComplexity();
+  }, [calculateComplexity]);
 
   return (
     <div className="space-y-4">
@@ -658,8 +613,8 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
                       ? formulaComplexity < 30
                         ? "outline"
                         : formulaComplexity < 70
-                        ? "secondary"
-                        : "default"
+                          ? "secondary"
+                          : "default"
                       : "outline"
                   }
                 >
@@ -668,7 +623,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
               </div>
               <Progress value={formulaComplexity} className="h-2" />
             </div>
-
             {/* Fórmula actual */}
             <div className="space-y-2">
               <div className="flex gap-2 items-center">
@@ -681,9 +635,8 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
                   onFocus={handleCursorPositionChange}
                   onClick={handleCursorPositionChange}
                   placeholder="Ejemplo: campo1 + campo2 * 0.19"
-                  className={`font-mono ${
-                    validationError ? "border-red-500" : ""
-                  }`}
+                  className={`font-mono ${validationError ? "border-red-500" : ""
+                    }`}
                 />
                 {!validationError && formula.trim() !== "" && (
                   <Check className="h-5 w-5 text-green-500" />
@@ -705,7 +658,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
                   Guardar
                 </Button>
               </div>
-
               {/* Visualización formateada */}
               {showHighlightedView && formula && (
                 <div className="p-2 border rounded bg-gray-50 min-h-8 font-mono">
@@ -713,7 +665,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
                 </div>
               )}
             </div>
-
             {/* Sugerencias */}
             {showSuggestions && (
               <Card className="max-h-[150px] overflow-auto">
@@ -730,7 +681,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
                 </ul>
               </Card>
             )}
-
             {/* Operadores */}
             <div>
               <p className="text-sm mb-2 font-medium">Operadores</p>
@@ -854,7 +804,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
           </div>
         </CardFooter>
       </Card>
-
       {/* Vista previa */}
       <Card>
         <CardHeader className="pb-3">
@@ -888,7 +837,6 @@ const FormulaBuilder: React.FC<FormulaBuilderProps> = ({
                 </div>
               ))}
             </div>
-
             {/* Resultado */}
             <div className="flex gap-4 items-center">
               <div className="flex items-center gap-2">

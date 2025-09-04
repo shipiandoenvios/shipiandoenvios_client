@@ -3,7 +3,6 @@ import { getRequestConfig } from "next-intl/server";
 import { routing } from "@/packages/internationalization/routing";
 
 export default getRequestConfig(async ({ locale }) => {
-  // Validar que el idioma solicitado existe en nuestra configuración
   const localeToUse = locale || routing.defaultLocale;
 
   if (
