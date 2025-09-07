@@ -51,11 +51,12 @@ export function AppSidebar({
     <Sidebar className="border-r border-gray-200" collapsible="icon">
       <SidebarHeader className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <img
+          <Image
             src="https://i.pinimg.com/736x/6d/af/c9/6dafc97bca1475385423ecef9f7f8899.jpg"
             alt="SHIPIANDO Logo"
             width={40}
             height={40}
+            className="rounded-full size-10"
           />
           <div className="group-data-[collapsible=icon]:hidden">
             <h2 className="text-xl font-bold text-gray-900">SHIPIANDO</h2>
