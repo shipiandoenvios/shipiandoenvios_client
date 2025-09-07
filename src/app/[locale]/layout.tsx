@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 interface RootLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: string }> | { locale: string };
+  params?: Promise<{ locale: string }>;
 }
 
 export function generateStaticParams() {
@@ -17,7 +17,7 @@ export function generateStaticParams() {
 }
 
 export default async function LocaleLayout({ children, params }: RootLayoutProps) {
-  const resolvedParams = await params;
+  const resolvedParams = params ? await params : { locale: "es" };
   const { locale } = resolvedParams;
 
   const messages = await getDictionary(locale);
