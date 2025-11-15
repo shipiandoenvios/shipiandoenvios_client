@@ -209,5 +209,31 @@
         }
       }
     }
+  },
+  "logistics": {
+    "status": {
+      "CREATED": "Creado",
+      "AWAITING_CHECKIN": "En espera de registro",
+      "AT_ORIGIN": "En origen",
+      "IN_WAREHOUSE": "En almacén",
+      "IN_TRANSIT": "En tránsito",
+      "OUT_FOR_DELIVERY": "En reparto",
+      "DELIVERED": "Entregado",
+      "RETURNED": "Devuelto",
+      "EXCEPTION": "Excepción"
+    },
+    "trackingEvent": {
+      "CREATED": "Creado",
+      "LABEL_PRINTED": "Etiqueta impresa",
+      "PICKED_UP": "Recogido",
+      "IN_TRANSIT": "En tránsito",
+      "HUB_TRANSFER": "Transferencia de centro",
+      "OUT_FOR_DELIVERY": "En reparto",
+      "DELIVERED": "Entregado",
+      "DELAYED": "Retrasado",
+      "EXCEPTION": "Excepción",
+      "RETURN_INITIATED": "Devolución iniciada",
+      "RETURNED": "Devuelto"
+    }
   }
 } 

@@ -1,5 +1,4 @@
 "use client"
-import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,12 +7,49 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertTriangle, Phone } from "lucide-react"
-import { problemPackages, problemTypes, emergencyContact } from "@/mocks/user"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
+
+type ProblemPackage = { id: string; description: string; problem: string; status: string; lastAttempt?: string }
+
+const defaultProblemTypes = [
+  { value: 'lost', label: 'Paquete perdido' },
+  { value: 'damaged', label: 'Paquete dañado' },
+  { value: 'delay', label: 'Retraso' },
+]
+
+const defaultEmergencyContact = { description: 'Soporte 24/7', phone: '+1-800-000-000' }
 
 export function UserProblemsContent() {
   const [trackingCode, setTrackingCode] = useState("")
   const [problemType, setProblemType] = useState("")
   const [description, setDescription] = useState("")
+  const [problemPackages, setProblemPackages] = useState<ProblemPackage[]>([])
+  const [problemTypes, setProblemTypes] = useState(defaultProblemTypes)
+  const [emergencyContact, setEmergencyContact] = useState(defaultEmergencyContact)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [pkgsRes, typesRes, contactRes] = await Promise.all([
+          fetchJson('/api/problems?user=me&status=active').catch(() => []),
+          fetchJson('/api/problem-types').catch(() => null),
+          fetchJson('/api/support/contact').catch(() => null),
+        ])
+        if (!mounted) return
+        const pkgs = Array.isArray(pkgsRes) ? pkgsRes : pkgsRes?.items ?? pkgsRes?.data ?? []
+        setProblemPackages(pkgs)
+        if (typesRes) setProblemTypes(typesRes)
+        if (contactRes) setEmergencyContact(contactRes)
+      } catch {
+        if (mounted) {
+          setProblemPackages([])
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   const handleSubmit = () => {
     if (!trackingCode || !problemType || !description.trim()) {
@@ -78,7 +114,7 @@ export function UserProblemsContent() {
       </Card>
 
       {/* Active Problems */}
-      {problemPackages.length > 0 && (
+  {problemPackages.length > 0 && (
         <Card className="border-0 shadow-lg">
           <CardContent className="p-6">
             <h3 className="text-xl font-semibold mb-4">Problemas Activos</h3>

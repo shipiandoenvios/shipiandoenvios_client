@@ -63,12 +63,13 @@ export function LoginForm() {
         return;
       }
 
-      if (!result.token || !result.user) {
+      if (!result.user) {
         setError("Respuesta inválida del servidor");
         return;
       }
 
-      setAuth(true, result.token, result.user);
+      // The server sets an HttpOnly cookie with the JWT. We avoid storing the token in localStorage.
+      setAuth(true, null, result.user);
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 

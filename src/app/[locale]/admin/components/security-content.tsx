@@ -2,9 +2,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Eye, Clock, User, AlertTriangle, CheckCircle } from "lucide-react"
-import { activityLogs, recentSessions } from "@/mocks/admin"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
+
+type Session = { user: string; status: string; ip?: string; location?: string; device?: string; time?: string }
+type Log = { user: string; action: string; type: string; time?: string; ip?: string }
+
 
 export function SecurityContent() {
+  const [recentSessions, setRecentSessions] = useState<Session[]>([])
+  const [activityLogs, setActivityLogs] = useState<Log[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [sessionsRes, logsRes] = await Promise.all([
+          fetchJson('/api/admin/sessions').catch(() => []),
+          fetchJson('/api/admin/activity-logs?limit=50').catch(() => []),
+        ])
+        if (!mounted) return
+        setRecentSessions(Array.isArray(sessionsRes) ? sessionsRes : sessionsRes?.items ?? sessionsRes?.data ?? [])
+        setActivityLogs(Array.isArray(logsRes) ? logsRes : logsRes?.items ?? logsRes?.data ?? [])
+      } catch {
+        if (mounted) {
+          setRecentSessions([])
+          setActivityLogs([])
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
+
   const getActionIcon = (type: string) => {
     switch (type) {
       case "create":

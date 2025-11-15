@@ -7,22 +7,33 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { User, Mail, Phone, MapPin, Lock, Bell, Save } from "lucide-react"
-import { userProfile } from "@/mocks/user/profile.mock"
+import { useEffect } from "react"
+import { fetchJson } from "@/lib/api"
 
 export function UserProfileContent() {
   const [isEditing, setIsEditing] = useState(false)
-  const [userData, setUserData] = useState({
-    name: userProfile.name,
-    email: userProfile.email,
-    phone: userProfile.phone,
-    address: userProfile.address,
-  })
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '', address: '' })
 
-  const [notifications, setNotifications] = useState({
-    email: userProfile.notifications.email,
-    sms: userProfile.notifications.sms,
-    push: userProfile.notifications.push,
-  })
+  const [notifications, setNotifications] = useState({ email: false, sms: false, push: false })
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await fetchJson('/api/user/me').catch(() => null)
+        if (!mounted) return
+        if (res) {
+          setUserData({ name: res.name || res.username || '', email: res.email || '', phone: res.phone || '', address: res.address || '' })
+          setNotifications(res.notifications || { email: false, sms: false, push: false })
+        }
+      } catch {
+        if (mounted) {
+          setUserData({ name: '', email: '', phone: '', address: '' })
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   const handleSave = () => {
     alert("Perfil actualizado exitosamente")
@@ -39,9 +50,9 @@ export function UserProfileContent() {
       {/* Account Status */}
       <Card className="border-0 shadow-lg bg-logistics-primary text-white">
         <CardContent className="p-6 text-center">
-          <Badge className="bg-white text-logistics-primary mb-4">{userProfile.accountStatus.badge}</Badge>
-          <h2 className="text-2xl font-bold mb-2">{userProfile.accountStatus.welcome}</h2>
-          <p className="text-white/80">Miembro desde {userProfile.accountStatus.memberSince} • {userProfile.accountStatus.packagesReceived} paquetes recibidos</p>
+          <Badge className="bg-white text-logistics-primary mb-4">Activo</Badge>
+          <h2 className="text-2xl font-bold mb-2">Bienvenido, {userData.name || 'Usuario'}</h2>
+          <p className="text-white/80">Miembro desde — • — paquetes recibidos</p>
         </CardContent>
       </Card>
       {/* Personal Info */}

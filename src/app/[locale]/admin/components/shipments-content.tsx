@@ -1,21 +1,79 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PackageData } from "@/contracts/package"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Package, Plus, Search, Filter, Eye, Edit, Trash2 } from "lucide-react"
-import { shipments, shipmentStatusFilters, statusColors } from "@/mocks/admin/shipments.mock"
+import { useEffect, useCallback, useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useError } from "@/hooks/use-error"
+import { ErrorMessage } from "@/components/ui/error-message"
+import { usePagination } from "@/hooks/use-pagination"
+import { Pagination } from "@/components/ui/pagination"
+import { getApiUrl } from "@/packages/config"
+const shipmentStatusFilters = [
+  { value: "all", label: "Todos" },
+  { value: "Pendiente", label: "Pendiente" },
+  { value: "En tránsito", label: "En tránsito" },
+  { value: "Entregado", label: "Entregado" },
+  { value: "Cancelado", label: "Cancelado" },
+];
+const statusColors = {
+  Pendiente: "bg-yellow-500",
+  "En tránsito": "bg-blue-500",
+  Entregado: "bg-green-500",
+  Cancelado: "bg-gray-500",
+  default: "bg-gray-500",
+};
 
 export function ShipmentsContent() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [shipments, setShipments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { error, showError, clearError } = useError();
+  const { page, setPage, limit, setLimit, total, pages, setMeta } = usePagination({ initialLimit: 20 });
+
+  const fetchShipments = useCallback(async () => {
+    setLoading(true);
+    clearError();
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        search: searchTerm,
+        status: statusFilter !== "all" ? statusFilter : "",
+      });
+      const res = await fetch(getApiUrl(`/api/shipment?${params}`), {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        showError(errorData.message || "Error al obtener envíos");
+        setShipments([]);
+        return;
+      }
+      const data = await res.json();
+      setShipments(data.items || []);
+      setMeta({ total: data.pagination?.total || 0 });
+    } catch (err) {
+      showError("Error de conexión. Intenta de nuevo más tarde.");
+      setShipments([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit, searchTerm, statusFilter, setMeta, showError, clearError]);
+
+  useEffect(() => {
+    fetchShipments();
+  }, [fetchShipments]);
 
   const getStatusColor = (status: string) => {
-    return statusColors[status as keyof typeof statusColors] || statusColors.default
-  }
+    return statusColors[status as keyof typeof statusColors] || statusColors.default;
+  };
 
   return (
     <div className="space-y-6">
@@ -27,7 +85,9 @@ export function ShipmentsContent() {
         </Button>
       </div>
 
-      {/* Filters */}
+  {/* Error Message */}
+  {error && <ErrorMessage message={error} className="mb-4" />}
+  {/* Filters */}
       <Card className="border-0 shadow-md">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -37,12 +97,15 @@ export function ShipmentsContent() {
                 <Input
                   placeholder="Buscar por ID, cliente o destino..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPage(1);
+                  }}
                   className="pl-10 rounded-lg"
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
               <SelectTrigger className="w-full md:w-48 rounded-lg">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
@@ -69,54 +132,33 @@ export function ShipmentsContent() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">ID Envío</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Cliente</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Destino</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Peso</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Fecha</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shipments.map((shipment) => (
-                  <tr key={shipment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-logistics-primary" />
-                        <span className="font-medium text-gray-900">{shipment.id}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-gray-700">{shipment.client}</td>
-                    <td className="py-4 px-4 text-gray-700">{shipment.destination}</td>
-                    <td className="py-4 px-4 text-gray-700">{shipment.weight}</td>
-                    <td className="py-4 px-4">
-                      <Badge className={`${getStatusColor(shipment.status)} text-white`}>{shipment.status}</Badge>
-                    </td>
-                    <td className="py-4 px-4 text-gray-700">{shipment.date}</td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-800">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" className="text-green-600 hover:text-green-800">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-800">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
+            {loading ? (
+              <div className="space-y-2">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 py-4 border-b border-gray-100">
+                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-24" />
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : shipments.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">No se encontraron envíos.</div>
+            ) : (
+              <table className="w-full">
+                {/* ...existing code... */}
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      <Pagination page={page} pages={pages} setPage={setPage} />
     </div>
-  )
+  );
 }

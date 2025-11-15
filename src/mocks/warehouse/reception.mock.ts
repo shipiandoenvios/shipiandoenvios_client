@@ -6,10 +6,4 @@ export interface WarehouseReceptionPackageData {
   weight: string;
 }
 
-export const warehouseReceptionMockPackage: WarehouseReceptionPackageData = {
-  tracking: "TRK-001237",
-  sender: "Roberto Silva",
-  recipient: "Laura Fernández",
-  destination: "Palermo",
-  weight: "2.5 kg",
-}
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

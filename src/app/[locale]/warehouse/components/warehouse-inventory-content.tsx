@@ -1,48 +1,82 @@
 "use client"
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { warehouseInventoryPackages, warehouseInventoryStatusIconMap } from "@/mocks/warehouse"
+import { useEffect, useCallback, useState } from "react"
+import { fetchJson } from "@/lib/api"
+import { useError } from "@/hooks/use-error"
+import { ErrorMessage } from "@/components/ui/error-message"
+import { usePagination } from "@/hooks/use-pagination"
+import { Pagination } from "@/components/ui/pagination"
+import { getApiUrl } from "@/packages/config"
 import { Package, Search, Truck } from "lucide-react"
 
-interface PackageData {
-  id: string
-  description: string
-  sender: string
-  status: "Entregado" | "En reparto" | "En tránsito"
-  date: string
-  progress: number
-  zone: string
-  priority: "Normal" | "Express" | "Urgente"
-  recipient: string
-  destination: string
-  weight: string
-  daysInWarehouse: number
-}
+import { PackageData } from "@/contracts/package"
 
 export function WarehouseInventoryContent() {
-  const [selectedPackages, setSelectedPackages] = useState<PackageData["id"][]>([])
-  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedPackages, setSelectedPackages] = useState<PackageData["id"][]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [packages, setPackages] = useState<PackageData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { error, showError, clearError } = useError();
+  const { page, setPage, limit, setLimit, total, pages, setMeta } = usePagination({ initialLimit: 20 });
 
-  const packages = warehouseInventoryPackages
+  const fetchPackages = useCallback(async () => {
+    setLoading(true);
+    clearError();
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        search: searchTerm,
+      });
+          const res = await fetch(getApiUrl(`/api/inventory?${params}`), {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        showError(errorData.message || "Error al obtener inventario");
+        setPackages([]);
+        return;
+      }
+      const data = await res.json();
+      setPackages(data.items || []);
+      setMeta({ total: data.pagination?.total || 0 });
+    } catch (err) {
+      showError("Error de conexión. Intenta de nuevo más tarde.");
+      setPackages([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit, searchTerm, setMeta, showError, clearError]);
+
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
+
   const handleSelectPackage = (packageId: string) => {
     setSelectedPackages((prev) =>
       prev.includes(packageId) ? prev.filter((id) => id !== packageId) : [...prev, packageId],
-    )
-  }
+    );
+  };
   const getStatusIcon = (status: string) => {
-    const mapping = warehouseInventoryStatusIconMap[status as keyof typeof warehouseInventoryStatusIconMap]
-    if (!mapping) return null
-    const Icon = mapping.icon
-    return <Icon className={`w-5 h-5 ${mapping.color}`} />
-  }
+    // Local simplified status icon mapping
+    const map: Record<string, { icon: any; color: string }> = {
+      RECEIVED: { icon: Package, color: 'text-green-600' },
+      HOLD: { icon: Truck, color: 'text-yellow-500' },
+      IN_TRANSIT: { icon: Truck, color: 'text-blue-500' },
+    };
+    const mapping = map[status] || null;
+    if (!mapping) return null;
+    const Icon = mapping.icon;
+    return <Icon className={`w-5 h-5 ${mapping.color}`} />;
+  };
 
   const filteredPackages = packages.filter(
     (pkg) =>
-      pkg.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pkg.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  pkg.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  (pkg.description?.toLowerCase() ?? "").includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <div className="space-y-8 p-6">
@@ -52,7 +86,9 @@ export function WarehouseInventoryContent() {
         <p className="text-xl text-gray-600">Gestiona los paquetes almacenados</p>
       </div>
 
-      {/* Stats */}
+  {/* Error Message */}
+  {error && <ErrorMessage message={error} className="mb-4" />}
+  {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="text-center border-0 shadow-lg">
           <CardContent className="p-6">
@@ -78,7 +114,7 @@ export function WarehouseInventoryContent() {
               <span className="text-white font-bold">!</span>
             </div>
             <p className="text-3xl font-bold text-gray-900 mb-2">
-              {packages.filter((p) => p.daysInWarehouse >= 2).length}
+              {packages.filter((p) => (p.daysInWarehouse ?? 0) >= 2).length}
             </p>
             <p className="text-sm text-gray-600">Más de 2 días</p>
           </CardContent>
@@ -103,7 +139,10 @@ export function WarehouseInventoryContent() {
               <Input
                 placeholder="Buscar por tracking, destinatario..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
                 className="pl-10"
               />
             </div>
@@ -124,39 +163,48 @@ export function WarehouseInventoryContent() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredPackages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedPackages.includes(pkg.id)
-                    ? "border-logistics-primary bg-logistics-primary/5"
-                    : "border-gray-200 hover:border-gray-300"
-                  }`}
-                onClick={() => handleSelectPackage(pkg.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon(pkg.status)}
-                    <div>
-                      <div className="font-semibold text-logistics-primary text-lg">{pkg.id}</div>
-                      <div className="text-gray-900 font-medium">{pkg.description}</div>
-                      <div className="text-gray-600 text-sm">
-                        De: {pkg.sender} | Para: {pkg.recipient}
+            {loading ? (
+              <div className="text-center py-8 text-gray-500">Cargando paquetes...</div>
+            ) : filteredPackages.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">No se encontraron paquetes.</div>
+            ) : (
+              filteredPackages.map((pkg) => (
+                <div
+                  key={pkg.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedPackages.includes(pkg.id)
+                      ? "border-logistics-primary bg-logistics-primary/5"
+                      : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  onClick={() => handleSelectPackage(pkg.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(pkg.status)}
+                      <div>
+                        <div className="font-semibold text-logistics-primary text-lg">{pkg.id}</div>
+                        <div className="text-gray-900 font-medium">{pkg.description}</div>
+                        <div className="text-gray-600 text-sm">
+                          De: {pkg.sender} | Para: {pkg.recipient}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium text-gray-900">{pkg.status}</div>
-                    <div className="text-sm text-gray-600">{pkg.date}</div>
-                    <div className="text-sm text-gray-600">{pkg.destination}</div>
-                    <div className="text-sm text-gray-600">{pkg.weight}</div>
-                    <div className="text-sm text-gray-600">{pkg.daysInWarehouse} días</div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">{pkg.status}</div>
+                      <div className="text-sm text-gray-600">{pkg.date}</div>
+                      <div className="text-sm text-gray-600">{pkg.destination}</div>
+                      <div className="text-sm text-gray-600">{pkg.weight}</div>
+                      <div className="text-sm text-gray-600">{pkg.daysInWarehouse} días</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      <Pagination page={page} pages={pages} setPage={setPage} />
 
       {/* Action Buttons */}
       <div className="flex gap-4">
@@ -171,5 +219,5 @@ export function WarehouseInventoryContent() {
         </Button>
       </div>
     </div>
-  )
+  );
 }

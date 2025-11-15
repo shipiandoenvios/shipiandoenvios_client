@@ -7,29 +7,4 @@ export interface Package {
     status: "Listo" | "Retirado" | "Falta";
 }
 
-export const assignedPackages: Package[] = [
-    {
-        id: "TRK-001234",
-        recipient: "María García",
-        destination: "Palermo",
-        weight: "2.5 kg",
-        priority: "Normal",
-        status: "Listo",
-    },
-    {
-        id: "TRK-001235",
-        recipient: "Carlos López",
-        destination: "Belgrano",
-        weight: "1.2 kg",
-        priority: "Express",
-        status: "Listo",
-    },
-    {
-        id: "TRK-001236",
-        recipient: "Ana Martín",
-        destination: "Recoleta",
-        weight: "0.8 kg",
-        priority: "Urgente",
-        status: "Retirado",
-    },
-]
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

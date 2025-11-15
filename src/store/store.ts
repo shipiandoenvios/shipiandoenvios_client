@@ -67,17 +67,20 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user }),
 
       setAuth: (isAuthenticated, token, user) => {
-        // También guardar el token en localStorage para el middleware
-        if (token) {
-          localStorage.setItem("auth-token", token);
-        }
-
-        set({ isAuthenticated, token, user });
+        // Do NOT persist token in localStorage for security; server sets HttpOnly cookie.
+        set({ isAuthenticated, token: token || null, user });
       },
 
-      logout: () => {
-        // Limpiar también localStorage
-        localStorage.removeItem("auth-token");
+      logout: async () => {
+        try {
+          // Tell server to clear cookie
+          await fetch(getApiUrl("/api/auth/logout"), {
+            method: "POST",
+            credentials: "include",
+          });
+        } catch (e) {
+          // ignore network errors
+        }
 
         set({
           user: null,
@@ -89,6 +92,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "sopy-auth-store", // Nombre para localStorage
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );
@@ -151,7 +155,7 @@ export const useGlobalStore = create<GlobalState>()(
         set({ isLoadingClients: true, loadError: null });
 
         try {
-          const response = await fetch(getApiUrl("/api/clients"), {
+          const response = await fetch(getApiUrl("/api/client"), {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -176,7 +180,7 @@ export const useGlobalStore = create<GlobalState>()(
 
         try {
           console.log("[GlobalStore] Forzando recarga de clientes...");
-          const response = await fetch(getApiUrl("/api/clients"), {
+          const response = await fetch(getApiUrl("/api/client"), {
             method: "GET",
             headers: {
               "Content-Type": "application/json",

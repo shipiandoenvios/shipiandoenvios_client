@@ -6,13 +6,38 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { QrCode, Package, CheckCircle, AlertTriangle } from "lucide-react"
-import { assignedPackages, Package as IPackage } from "@/mocks/carrier"
+import { useEffect } from "react"
+import { fetchJson } from "@/lib/api"
+
+type IPackage = {
+  id: string;
+  status?: string;
+  priority?: string;
+  recipient?: string;
+  destination?: string;
+  weight?: string;
+}
 
 
 
 export function CarrierPickupContent() {
   const [selectedPackages, setSelectedPackages] = useState<string[]>([])
   const [scanMode, setScanMode] = useState(false)
+  const [assignedPackages, setAssignedPackages] = useState<IPackage[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await fetchJson('/api/shipment?assignedTo=me&limit=200').catch(() => [])
+        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? []
+        if (mounted) setAssignedPackages(items)
+      } catch {
+        if (mounted) setAssignedPackages([])
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
 
 
@@ -64,7 +89,7 @@ export function CarrierPickupContent() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Retiro de Paquetes</h1>
-        <p className="text-xl text-gray-600">Confirma el retiro de {assignedPackages.length} paquetes asignados</p>
+  <p className="text-xl text-gray-600">Confirma el retiro de {assignedPackages.length} paquetes asignados</p>
       </div>
 
       {/* Stats */}
@@ -160,7 +185,7 @@ export function CarrierPickupContent() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {assignedPackages.map((pkg) => (
+            {assignedPackages.map((pkg: IPackage) => (
               <div
                 key={pkg.id}
                 className={`p-4 rounded-lg border-l-4 ${pkg.status === "Listo"

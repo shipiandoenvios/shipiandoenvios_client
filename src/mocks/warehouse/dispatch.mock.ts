@@ -21,62 +21,6 @@ export interface Carrier {
     status: "Disponible" | "En ruta" | "Ocupado"
 }
 
-export const warehouseDispatchCarriers: Carrier[] = [
-    {
-        id: "C001",
-        name: "Juan Pérez",
-        zone: "Zona Norte",
-        capacity: 10,
-        status: "Disponible",
-    },
-    {
-        id: "C002",
-        name: "María López",
-        zone: "Zona Sur",
-        capacity: 8,
-        status: "Disponible",
-    },
-]
-
-export const warehouseDispatchPackages: PackageData[] = [
-    {
-        id: "TRK-001234",
-        description: "Libro JavaScript",
-        sender: "Amazon",
-        status: "En reparto",
-        date: "Hoy 16:30",
-        progress: 90,
-        zone: "Zona Norte",
-        priority: "Normal",
-        recipient: "María García",
-        destination: "Palermo",
-    },
-    {
-        id: "TRK-001235",
-        description: "Auriculares Bluetooth",
-        sender: "MercadoLibre",
-        status: "En tránsito",
-        date: "Mañana",
-        progress: 60,
-        zone: "Zona Norte",
-        priority: "Express",
-        recipient: "Ana Martín",
-        destination: "Belgrano",
-    },
-    {
-        id: "TRK-001236",
-        description: "Medicamentos",
-        sender: "Farmacia Online",
-        status: "Entregado",
-        date: "Ayer",
-        progress: 100,
-        zone: "Zona Sur",
-        priority: "Normal",
-        recipient: "Carlos Rodríguez",
-        destination: "Caballito",
-    },
-]
-
 export const warehouseDispatchStatusIconMap = {
     Entregado: {
         icon: CheckCircle,
@@ -91,3 +35,5 @@ export const warehouseDispatchStatusIconMap = {
         color: "text-orange-500",
     },
 }
+
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

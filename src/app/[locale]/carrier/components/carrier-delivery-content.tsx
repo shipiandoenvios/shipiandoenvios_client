@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +7,25 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { QrCode, Camera, CheckCircle, AlertTriangle, MapPin, Phone, Package } from "lucide-react"
-import { currentPackage, deliveryFailureReasons, priorityColors, DeliveryPackage } from "@/mocks/carrier"
+import { fetchJson } from "@/lib/api"
+import { useEffect, useState } from "react"
+
+type DeliveryPackage = {
+  id: string;
+  recipient?: string;
+  phone?: string;
+  address?: string;
+  weight?: string;
+  priority?: string;
+}
+
+const deliveryFailureReasons = [
+  { value: 'recipient_not_available', label: 'Destinatario ausente' },
+  { value: 'wrong_address', label: 'Dirección incorrecta' },
+  { value: 'damaged', label: 'Paquete dañado' },
+]
+
+const priorityColors: Record<string, string> = { Alta: 'bg-red-500', Media: 'bg-yellow-500', Baja: 'bg-blue-500', default: 'bg-gray-400' }
 
 export function CarrierDeliveryContent() {
   const [selectedPackage, setSelectedPackage] = useState<DeliveryPackage | null>(null)
@@ -17,8 +33,24 @@ export function CarrierDeliveryContent() {
   const [comments, setComments] = useState("")
   const [recipientName, setRecipientName] = useState("")
 
-  const handleScanPackage = () => {
-    setSelectedPackage(currentPackage)
+  const handleScanPackage = async () => {
+    // simulate scanning by fetching an assigned shipment/package
+    try {
+      const res = await fetchJson('/api/shipment?assignedTo=me&limit=1').catch(() => null)
+      const item = Array.isArray(res) ? res[0] : res?.items?.[0] ?? res?.data?.[0] ?? res
+      if (item) {
+        setSelectedPackage({
+          id: item.id ?? item.trackingCode,
+          recipient: item.recipient,
+          phone: item.phone,
+          address: item.address || item.destination,
+          weight: item.weight,
+          priority: item.priority,
+        })
+      }
+    } catch {
+      setSelectedPackage(null)
+    }
   }
 
   const handleDeliverySuccess = () => {

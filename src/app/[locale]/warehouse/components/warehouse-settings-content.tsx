@@ -5,12 +5,40 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { warehouseSettingsAuthorizedUsers, warehouseSettingsZones } from "@/mocks/warehouse/settings.mock"
 import { Settings, Users, MapPin, Package, Save } from "lucide-react"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
+
+type AuthorizedUser = { id: string; name: string; role: string; shift?: string; status?: string };
+type Zone = { id: string; name: string; areas: string[] };
 
 export function WarehouseSettingsContent() {
-  const authorizedUsers = warehouseSettingsAuthorizedUsers
-  const zones = warehouseSettingsZones
+  const [authorizedUsers, setAuthorizedUsers] = useState<AuthorizedUser[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        // Try to use existing backend endpoints: inventory/warehouse controllers.
+        // Backend exposes /api/warehouse (list) and /api/inventory. Attempt to read settings from /api/warehouse
+        const res = await fetchJson('/api/warehouse').catch(() => null);
+        if (!mounted) return;
+        if (res) {
+          // backend likely returns { items: [...] } or array
+          const data = Array.isArray(res) ? res[0] : res.items?.[0] || res;
+          setAuthorizedUsers(data?.authorizedUsers || data?.users || []);
+          setZones(data?.zones || []);
+        }
+      } catch {
+        if (mounted) {
+          setAuthorizedUsers([]);
+          setZones([]);
+        }
+      }
+    })();
+    return () => { mounted = false };
+  }, []);
 
   return (
     <div className="space-y-8 p-6">

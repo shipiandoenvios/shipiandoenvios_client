@@ -3,8 +3,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Navigation, Clock, Package, CheckCircle } from "lucide-react"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
 
-import { RoutePackage, routePackages, routeStatusColors, routePriorityColors } from "@/mocks/carrier/route.mock"
+type RoutePackage = {
+  id: string;
+  order?: number;
+  status?: string;
+  priority?: string;
+  recipient?: string;
+  address?: string;
+  distance?: string;
+}
+
+// Local color maps (UI-only)
+const routeStatusColors: Record<string, string> = {
+  Entregado: 'bg-green-500',
+  'En camino': 'bg-blue-500',
+  Pendiente: 'bg-orange-500',
+  default: 'bg-gray-400',
+}
+const routePriorityColors: Record<string, string> = {
+  Alta: 'bg-red-500',
+  Media: 'bg-yellow-500',
+  Baja: 'bg-blue-500',
+  default: 'bg-gray-400',
+}
 
 
 
@@ -12,11 +36,11 @@ export function CarrierRouteContent() {
 
 
   const getStatusColor = (status: RoutePackage["status"]): string => {
-    return routeStatusColors[status] || routeStatusColors["default"];
+    return routeStatusColors[status ?? "default"] || routeStatusColors["default"];
   }
 
   const getPriorityColor = (priority: RoutePackage["priority"]): string => {
-    return routePriorityColors[priority] || routePriorityColors["default"];
+    return routePriorityColors[priority ?? "default"] || routePriorityColors["default"];
   }
 
   const getStatusIcon = (status: RoutePackage["status"]) => {
@@ -32,14 +56,30 @@ export function CarrierRouteContent() {
     }
   }
 
-  const completedDeliveries = routePackages.filter((pkg) => pkg.status === "Entregado").length
+  const [routePackages, setRoutePackages] = useState<RoutePackage[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetchJson('/api/shipment?assignedTo=me&limit=200');
+        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        if (mounted) setRoutePackages(items as RoutePackage[]);
+      } catch (e) {
+        if (mounted) setRoutePackages([]);
+      }
+    })();
+    return () => { mounted = false }
+  }, []);
+
+  const completedDeliveries = routePackages.filter((pkg: RoutePackage) => pkg.status === "Entregado").length
 
   return (
     <div className="space-y-8 p-6">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Mi Hoja de Ruta</h1>
-        <p className="text-xl text-gray-600">{routePackages.length} entregas programadas para hoy</p>
+  <p className="text-xl text-gray-600">{routePackages.length} entregas programadas para hoy</p>
       </div>
 
       {/* Route Summary */}
@@ -62,7 +102,7 @@ export function CarrierRouteContent() {
           <CardContent className="p-6">
             <Clock className="w-12 h-12 text-orange-600 mx-auto mb-4" />
             <p className="text-3xl font-bold text-gray-900 mb-2">
-              {routePackages.filter((p) => p.status === "Pendiente").length}
+              {routePackages.filter((p: RoutePackage) => p.status === "Pendiente").length}
             </p>
             <p className="text-sm text-gray-600">Pendientes</p>
           </CardContent>
@@ -109,8 +149,9 @@ export function CarrierRouteContent() {
         <CardContent>
           <div className="space-y-4">
             {routePackages
-              .sort((a, b) => a.order - b.order)
-              .map((pkg) => (
+              .slice()
+              .sort((a: RoutePackage, b: RoutePackage) => (a.order ?? 0) - (b.order ?? 0))
+              .map((pkg: RoutePackage) => (
                 <div
                   key={pkg.id}
                   className={`p-4 rounded-lg border-l-4 ${pkg.status === "Entregado"

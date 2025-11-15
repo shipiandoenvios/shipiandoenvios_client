@@ -9,7 +9,6 @@ const config = {
     "./src/**/*.{ts,tsx}",
   ],
   safelist: [
-    // Clases de utilidad de logistics
     'bg-logistics-primary',
     'bg-logistics-secondary',
     'bg-logistics-dark',
@@ -85,19 +84,16 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Colores específicos de SHIPIANDO
         "logistics-primary": "hsl(var(--logistics-primary))",
         "logistics-secondary": "hsl(var(--logistics-secondary))",
         "logistics-dark": "hsl(var(--logistics-dark))",
         "logistics-light": "hsl(var(--logistics-light))",
         "logistics-accent": "hsl(var(--logistics-accent))",
-        // Colores para gráficos
         "chart-1": "hsl(var(--chart-1))",
         "chart-2": "hsl(var(--chart-2))",
         "chart-3": "hsl(var(--chart-3))",
         "chart-4": "hsl(var(--chart-4))",
         "chart-5": "hsl(var(--chart-5))",
-        // Colores del sidebar
         sidebar: {
           DEFAULT: "hsl(var(--sidebar))",
           foreground: "hsl(var(--sidebar-foreground))",

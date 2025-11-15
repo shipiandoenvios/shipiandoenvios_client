@@ -1,17 +1,45 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CheckCircle, AlertTriangle, Clock, Package, MapPin, Phone, FileText } from "lucide-react"
-import { Delivery, deliveryHistory } from "@/mocks/carrier"
+import { fetchJson } from "@/lib/api"
+
+type Delivery = {
+  id: string;
+  status: string;
+  priority?: string;
+  recipient?: string;
+  address?: string;
+  time?: string;
+  phone?: string;
+  comments?: string;
+  receivedBy?: string;
+  failureReason?: string;
+}
 
 
 
 export function CarrierHistoryContent() {
   const [statusFilter, setStatusFilter] = useState("all")
+  const [deliveryHistory, setDeliveryHistory] = useState<Delivery[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await fetchJson('/api/shipment?limit=200&page=1').catch(() => [])
+        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? []
+        if (mounted) setDeliveryHistory(items)
+      } catch {
+        if (mounted) setDeliveryHistory([])
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   
 
@@ -50,14 +78,14 @@ export function CarrierHistoryContent() {
     }
   }
 
-  const filteredHistory = deliveryHistory.filter((delivery) => {
+  const filteredHistory = deliveryHistory.filter((delivery: Delivery) => {
     if (statusFilter !== "all" && delivery.status.toLowerCase() !== statusFilter) return false
     return true
   })
 
-  const successfulDeliveries = deliveryHistory.filter((d) => d.status === "Entregado").length
-  const failedDeliveries = deliveryHistory.filter((d) => d.status === "Fallido").length
-  const successRate = Math.round((successfulDeliveries / deliveryHistory.length) * 100)
+  const successfulDeliveries = deliveryHistory.filter((d: Delivery) => d.status === "Entregado").length
+  const failedDeliveries = deliveryHistory.filter((d: Delivery) => d.status === "Fallido").length
+  const successRate = deliveryHistory.length > 0 ? Math.round((successfulDeliveries / deliveryHistory.length) * 100) : 0
 
   return (
     <div className="space-y-8 p-6">
@@ -133,7 +161,7 @@ export function CarrierHistoryContent() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredHistory.map((delivery) => (
+            {filteredHistory.map((delivery: Delivery) => (
               <div
                 key={delivery.id}
                 className={`p-4 rounded-lg border-l-4 ${

@@ -3,8 +3,9 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { warehouseDispatchCarriers, warehouseDispatchPackages, warehouseDispatchStatusIconMap } from "@/mocks/warehouse"
-import { Search } from "lucide-react"
+import { Search, CheckCircle, Navigation, Truck } from "lucide-react"
+import { useEffect } from "react"
+import { fetchJson } from "@/lib/api"
 
 interface PackageData {
   id: string
@@ -23,11 +24,39 @@ export function WarehouseDispatchContent() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPackages, setSelectedPackages] = useState<PackageData["id"][]>([])
   const [selectedCarrier, setSelectedCarrier] = useState("")
+  const [carriers, setCarriers] = useState<any[]>([])
+  const [packages, setPackages] = useState<PackageData[]>([])
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [cRes, pRes] = await Promise.all([
+          fetchJson('/api/carrier?limit=50').catch(() => []),
+          fetchJson('/api/inventory?status=ready&limit=200').catch(() => []),
+        ])
+        if (!mounted) return
+        const cItems = Array.isArray(cRes) ? cRes : cRes?.items ?? cRes?.data ?? []
+        const pItems = Array.isArray(pRes) ? pRes : pRes?.items ?? pRes?.data ?? []
+        setCarriers(cItems)
+        setPackages(pItems)
+      } catch {
+        if (mounted) {
+          setCarriers([])
+          setPackages([])
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
-  const carriers = warehouseDispatchCarriers
-  const packages = warehouseDispatchPackages
   const getStatusIcon = (status: string) => {
-    const mapping = warehouseDispatchStatusIconMap[status as keyof typeof warehouseDispatchStatusIconMap]
+    // simplified icon mapping
+    const map: Record<string, { icon: any; color: string }> = {
+      "Entregado": { icon: CheckCircle, color: 'text-green-600' },
+      "En reparto": { icon: Navigation, color: 'text-blue-500' },
+      "En tránsito": { icon: Truck, color: 'text-blue-500' },
+    }
+    const mapping = map[status] || null
     if (!mapping) return null
     const Icon = mapping.icon
     return <Icon className={`w-5 h-5 ${mapping.color}`} />

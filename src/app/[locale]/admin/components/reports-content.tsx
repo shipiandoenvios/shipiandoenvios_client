@@ -2,9 +2,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FileText, Download, Calendar } from "lucide-react"
-import { quickStats, reportTypes, recentReports } from "@/mocks/admin"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
+
+const defaultQuickStats: any[] = []
+const defaultReportTypes: any[] = []
+const defaultRecentReports: any[] = []
 
 export function ReportsContent() {
+  const [quickStats, setQuickStats] = useState<any[]>(defaultQuickStats)
+  const [reportTypes, setReportTypes] = useState<any[]>(defaultReportTypes)
+  const [recentReports, setRecentReports] = useState<any[]>(defaultRecentReports)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [qs, rt, rr] = await Promise.all([
+          fetchJson('/api/admin/reports/quick-stats').catch(() => []),
+          fetchJson('/api/admin/reports/types').catch(() => []),
+          fetchJson('/api/admin/reports/recent?limit=10').catch(() => []),
+        ])
+        if (!mounted) return
+        setQuickStats(Array.isArray(qs) ? qs : qs?.items ?? qs?.data ?? [])
+        setReportTypes(Array.isArray(rt) ? rt : rt?.items ?? rt?.data ?? [])
+        setRecentReports(Array.isArray(rr) ? rr : rr?.items ?? rr?.data ?? [])
+      } catch {
+        if (mounted) {
+          setQuickStats([])
+          setReportTypes([])
+          setRecentReports([])
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

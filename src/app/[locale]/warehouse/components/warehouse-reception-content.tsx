@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { warehouseReceptionMockPackage } from "@/mocks/warehouse"
 import { QrCode, Camera, Package, CheckCircle } from "lucide-react"
+import { fetchJson } from "@/lib/api"
+import { useEffect } from "react"
 
 interface PackageData {
   tracking: string;
@@ -20,8 +21,34 @@ export function WarehouseReceptionContent() {
   const [trackingCode, setTrackingCode] = useState("")
   const [packageData, setPackageData] = useState<PackageData | null>(null)
 
-  const handleScan = () => {
-    setPackageData(warehouseReceptionMockPackage)
+  const handleScan = async () => {
+    // if trackingCode present (manual), search by tracking, otherwise simulate by fetching a recent package
+    try {
+      if (trackingCode) {
+      // Use `search` param consistent with server-side search/filter
+      const res = await fetchJson(`/api/package?search=${encodeURIComponent(trackingCode)}`).catch(() => null);
+        const item = Array.isArray(res) ? res[0] : res?.items?.[0] ?? res?.data?.[0] ?? res;
+        setPackageData(item ? {
+          tracking: item.trackingCode ?? item.id,
+          sender: item.sender ?? item.from,
+          recipient: item.recipient ?? item.to,
+          destination: item.destination ?? item.zone,
+          weight: item.weight ?? ''
+        } : null);
+      } else {
+        const res = await fetchJson('/api/package?limit=1').catch(() => null);
+        const item = Array.isArray(res) ? res[0] : res?.items?.[0] ?? res?.data?.[0] ?? res;
+        setPackageData(item ? {
+          tracking: item.trackingCode ?? item.id,
+          sender: item.sender ?? item.from,
+          recipient: item.recipient ?? item.to,
+          destination: item.destination ?? item.zone,
+          weight: item.weight ?? ''
+        } : null);
+      }
+    } catch (e) {
+      setPackageData(null);
+    }
   }
 
   const handleConfirmReception = () => {

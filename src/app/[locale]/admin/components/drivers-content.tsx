@@ -2,10 +2,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Truck, Plus, MapPin, Package, Clock, Star } from "lucide-react"
-import { drivers, driverStats } from "@/mocks/admin"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
+
+const defaultDriverStats = { totalDrivers: 0, onRoute: 0, available: 0, outOfService: 0 }
 
 
 export function DriversContent() {
+  const [drivers, setDrivers] = useState<any[]>([])
+  const [driverStats, setDriverStats] = useState<any>(defaultDriverStats)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [dRes, sRes] = await Promise.all([
+          fetchJson('/api/driver?limit=200').catch(() => []),
+          fetchJson('/api/driver/stats').catch(() => null),
+        ])
+        if (!mounted) return
+        setDrivers(Array.isArray(dRes) ? dRes : dRes?.items ?? dRes?.data ?? [])
+        if (sRes) setDriverStats(sRes)
+      } catch {
+        if (mounted) {
+          setDrivers([])
+          setDriverStats(defaultDriverStats)
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {

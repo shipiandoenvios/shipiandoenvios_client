@@ -1,7 +1,1 @@
-export * from "./clients.mock"
-export * from "./dashboard.mock"
-export * from "./drivers.mock"
-export * from "./reports.mock"
-export * from "./security.mock"
-export * from "./settings.mock"
-export * from "./shipments.mock"
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

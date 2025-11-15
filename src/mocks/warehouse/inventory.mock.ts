@@ -15,50 +15,7 @@ export interface WarehouseInventoryPackageData {
   daysInWarehouse: number
 }
 
-export const warehouseInventoryPackages: WarehouseInventoryPackageData[] = [
-  {
-    id: "TRK-001234",
-    description: "Libro JavaScript",
-    sender: "Amazon",
-    status: "En reparto",
-    date: "Hoy 16:30",
-    progress: 90,
-    zone: "Zona Norte",
-    priority: "Normal",
-    recipient: "María García",
-    destination: "Palermo",
-    weight: "2.5 kg",
-    daysInWarehouse: 1
-  },
-  {
-    id: "TRK-001235",
-    description: "Auriculares Bluetooth",
-    sender: "MercadoLibre",
-    status: "En tránsito",
-    date: "Mañana",
-    progress: 60,
-    zone: "Zona Norte",
-    priority: "Express",
-    recipient: "Ana Martín",
-    destination: "Belgrano",
-    weight: "1.2 kg",
-    daysInWarehouse: 1
-  },
-  {
-    id: "TRK-001236",
-    description: "Medicamentos",
-    sender: "Farmacia Online",
-    status: "Entregado",
-    date: "Ayer",
-    progress: 100,
-    zone: "Zona Sur",
-    priority: "Urgente",
-    recipient: "Carlos Rodríguez",
-    destination: "Caballito",
-    weight: "0.8 kg",
-    daysInWarehouse: 2
-  }
-]
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.
 
 export const warehouseInventoryPriorityColorMap = {
   Express: "bg-red-500",
