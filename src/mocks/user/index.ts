@@ -1,5 +1,1 @@
-export * from "./addresses.mock"
-export * from "./dashboard.mock"
-export * from "./package-detail.mock"
-export * from "./packages.mock"
-export * from "./problems.mock"
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

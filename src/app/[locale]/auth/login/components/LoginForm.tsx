@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { MoveRight, MailIcon, LockIcon, Eye, EyeOff } from "lucide-react";
 import { LoginFormValues, loginSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
+import { authService } from '@/packages/auth/authService';
 import { getApiUrl } from "@/packages/config";
 import { UserInfo } from "@/store/store";
 
@@ -47,28 +48,20 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const response = await fetch(getApiUrl(`/api/auth/login`), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-
-      const result = await response.json() as LoginResponse;
+      const result = await authService.login(data) as LoginResponse & { token?: string };
 
       if (!result.success) {
         setError(result.message || "Error al iniciar sesión");
         return;
       }
 
-      if (!result.token || !result.user) {
+      if (!result.user) {
         setError("Respuesta inválida del servidor");
         return;
       }
 
-      setAuth(true, result.token, result.user);
+      // The server sets an HttpOnly cookie with the JWT. We avoid storing the token in localStorage.
+      setAuth(true, null, result.user as UserInfo);
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -81,24 +74,7 @@ export function LoginForm() {
         return;
       }
 
-      let redirectPath;
-
-      switch (result.user.role) {
-        case "SUPER_ADMIN":
-          redirectPath = "/app/dashboard";
-          break;
-        case "ADMIN":
-        case "EMPRESA":
-        case "ENCARGADO":
-        case "ADMINISTRATIVO":
-        case "ANALISTA":
-        case "EMPLOYEE":
-          redirectPath = "/app/accountant/dashboard";
-          break;
-        default:
-          redirectPath = "/app/client/dashboard";
-      }
-
+      const redirectPath = authService.getRedirectPathByRole(result.user.roles || result.user.role);
       const fullPath = `/${locale}${redirectPath}`;
       window.location.href = fullPath;
     } catch (err) {

@@ -2,9 +2,9 @@
 
 import { UserInfo } from "@/store/store";
 
-// Constantes
-const TOKEN_KEY = "sopy-auth-token";
-const USER_KEY = "sopy-auth-user";
+// Constantes (leer desde env; usar NEXT_PUBLIC_ prefix para que estén disponibles en el cliente)
+const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || "auth-token";
+const USER_KEY = process.env.NEXT_PUBLIC_USER_KEY || "sopy-auth-user";
 
 /**
  * Guarda el token en localStorage

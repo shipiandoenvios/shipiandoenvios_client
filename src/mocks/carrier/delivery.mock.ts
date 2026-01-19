@@ -7,27 +7,4 @@ export interface DeliveryPackage {
     priority: string;
 }
 
-export const currentPackage: DeliveryPackage = {
-    id: "TRK-001234",
-    recipient: "María García",
-    address: "Av. Santa Fe 1234, Piso 5, Depto B, Palermo",
-    phone: "+54 11 4567-8901",
-    weight: "2.5 kg",
-    priority: "Normal",
-}
-
-export const deliveryFailureReasons = [
-    { value: "absent", label: "Destinatario ausente" },
-    { value: "wrong-address", label: "Dirección incorrecta" },
-    { value: "refused", label: "Paquete rechazado" },
-    { value: "no-access", label: "Sin acceso al edificio" },
-    { value: "damaged", label: "Paquete dañado" },
-    { value: "other", label: "Otro motivo" },
-]
-
-export const priorityColors = {
-    "Normal": "bg-blue-500",
-    "Alta": "bg-red-500",
-    "Baja": "bg-green-500",
-    "default": "bg-gray-500"
-}
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

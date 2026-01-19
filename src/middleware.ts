@@ -17,122 +17,31 @@ interface RoleRoutes {
   [key: string]: string[];
 }
 
+// Unified role names and route prefixes
 const ROLE_ROUTES: RoleRoutes = {
-  SUPER_ADMIN: ["/app/dashboard"],
-  ADMIN: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  EMPRESA: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ACCOUNTANT: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ENCARGADO: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ADMINISTRATIVO: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ANALISTA: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  EMPLOYEE: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  USER: [
-    "/app/client/dashboard",
-    "/app/client/rcv",
-    "/app/client/rh",
-    "/app/client/iusc",
-    "/app/client/ppm",
-    "/app/client/retencion-iva",
-    "/app/client/change-password",
-  ],
+  ADMIN: ["/admin"],
+  CLIENT: ["/user"],
+  USER: ["/user"],
+  WAREHOUSE: ["/warehouse"],
+  CARRIER: ["/carrier"],
+  STORE: ["/user"],
+};
+
+// Legacy-to-unified role alias mapping
+const ROLE_ALIAS: { [key: string]: keyof typeof ROLE_ROUTES } = {
+  SUPER_ADMIN: "ADMIN",
+  ACCOUNTANT: "ADMIN",
+  ENCARGADO: "ADMIN",
+  ADMINISTRATIVO: "ADMIN",
+  ANALISTA: "ADMIN",
+  EMPRESA: "CLIENT",
+  EMPLOYEE: "USER",
+  ADMIN: "ADMIN",
+  CLIENT: "CLIENT",
+  USER: "USER",
+  WAREHOUSE: "WAREHOUSE",
+  CARRIER: "CARRIER",
+  STORE: "STORE",
 };
 
 const PUBLIC_ROUTES = [
@@ -159,11 +68,10 @@ const isProtectedRoute = (pathname: string) => {
   }
 
   const protectedPaths = [
-    "/app/",
-    "/dashboard",
-    "/accountant",
-    "/client",
-    "/admin/",
+    "/admin",
+    "/user",
+    "/carrier",
+    "/warehouse",
   ];
   return protectedPaths.some((path) => pathname.includes(path));
 };
@@ -178,21 +86,25 @@ const isModuleEnabled = (pathname: string) => {
   return true; // Las demás rutas siempre están habilitadas
 };
 
+// Cookie names (server-side). Use env vars (AUTH_COOKIE_NAME, USER_COOKIE_NAME) to avoid hardcoded names.
+const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || "sopy-auth-token";
+const USER_COOKIE_NAME = process.env.USER_COOKIE_NAME || "sopy-user";
+
 const isAuthenticated = (request: NextRequest): boolean => {
-  const authToken = request.cookies.get("sopy-auth-token");
-  const userCookie = request.cookies.get("sopy-user");
+  const authToken = request.cookies.get(AUTH_COOKIE_NAME);
+  const userCookie = request.cookies.get(USER_COOKIE_NAME);
 
   const cookieHasToken = !!authToken?.value;
   const cookieHasUser = !!userCookie?.value;
 
-  console.log("Cookies:", { authToken: cookieHasToken, user: cookieHasUser });
+  /* console.log("Cookies:", { authToken: cookieHasToken, user: cookieHasUser });
   console.log("Verificando autenticación:");
   console.log("- ¿Tiene token de autenticación?", cookieHasToken);
-  console.log("- ¿Tiene cookie de usuario?", cookieHasUser);
+  console.log("- ¿Tiene cookie de usuario?", cookieHasUser); */
 
   const isAuth = cookieHasToken;
-  console.log("¿Usuario autenticado?", isAuth);
-
+/*   console.log("¿Usuario autenticado?", isAuth);
+ */
   return isAuth;
 };
 
@@ -201,12 +113,12 @@ const hasRequiredRole = (request: NextRequest, path: string): boolean => {
     console.log("\n=== Verificando permisos de acceso ===");
     console.log("Ruta solicitada:", path);
 
-    const userCookie = request.cookies.get("sopy-user");
+  const userCookie = request.cookies.get(USER_COOKIE_NAME);
     if (!userCookie?.value) {
       console.log(
         "No se encontró cookie de usuario, pero podría tener token válido"
       );
-      const authToken = request.cookies.get("sopy-auth-token");
+  const authToken = request.cookies.get(AUTH_COOKIE_NAME);
       if (authToken?.value) {
         console.log(
           "Tiene token de autenticación - permitiendo acceso temporal"
@@ -217,33 +129,36 @@ const hasRequiredRole = (request: NextRequest, path: string): boolean => {
     }
 
     const userData = JSON.parse(userCookie.value);
-    const userRole = userData.role;
-    console.log("Rol del usuario:", userRole);
+    const rolesFromCookie: string[] = Array.isArray(userData.roles)
+      ? userData.roles
+      : userData.role
+      ? [userData.role]
+      : [];
+/*     console.log("Rol del usuario:", userRole);
     console.log("Datos de usuario completos:", userData);
-
+ */
     if (userData.permissions) {
-      console.log(
+     /*  console.log(
         "Permisos del usuario:",
         userData.permissions
           .map((p: any) => `${p.permission}:${p.resource}`)
           .join(", ")
-      );
+      ); */
     }
 
-    if (userRole === "SUPER_ADMIN") {
-      console.log("Usuario es SUPER_ADMIN - acceso total");
-      return true;
-    }
-
-    const allowedRoutes =
-      ROLE_ROUTES[userRole as keyof typeof ROLE_ROUTES] || [];
-    console.log("Rutas permitidas para este rol:", allowedRoutes);
-
+    const normalizedRoles = rolesFromCookie
+      .map((r: string) => ROLE_ALIAS[r] || (r as keyof typeof ROLE_ROUTES))
+      .filter(Boolean) as (keyof typeof ROLE_ROUTES)[];
+    const allowedRoutes = normalizedRoles.flatMap(
+      (nr) => ROLE_ROUTES[nr] || []
+    );
+/*     console.log("Rutas permitidas para este rol:", allowedRoutes);
+ */
     const hasAccess = allowedRoutes.some((route: string) =>
       path.startsWith(route)
     );
-    console.log("¿Tiene acceso a la ruta solicitada?", hasAccess);
-
+/*     console.log("¿Tiene acceso a la ruta solicitada?", hasAccess);
+ */
     return hasAccess;
   } catch (error) {
     console.error("Error al verificar el rol:", error);
@@ -253,9 +168,9 @@ const hasRequiredRole = (request: NextRequest, path: string): boolean => {
 
 const getRedirectPathForRole = (request: NextRequest): string => {
   try {
-    const userCookie = request.cookies.get("sopy-user");
+  const userCookie = request.cookies.get(USER_COOKIE_NAME);
     if (!userCookie?.value) {
-      const authToken = request.cookies.get("sopy-auth-token");
+  const authToken = request.cookies.get(AUTH_COOKIE_NAME);
       if (authToken?.value) {
         console.log(
           "No hay cookie de usuario pero sí hay token - redirigiendo a dashboard por defecto"
@@ -266,29 +181,28 @@ const getRedirectPathForRole = (request: NextRequest): string => {
     }
 
     const userData = JSON.parse(userCookie.value);
-    const userRole = userData.role;
-
-    switch (userRole) {
-      case "SUPER_ADMIN":
-        return "/app/dashboard";
+    const rolesFromCookie: string[] = Array.isArray(userData.roles)
+      ? userData.roles
+      : userData.role
+      ? [userData.role]
+      : [];
+    const normalizedRoles = rolesFromCookie
+      .map((r: string) => ROLE_ALIAS[r] || r)
+      .filter(Boolean);
+    const priority = ["ADMIN", "WAREHOUSE", "CARRIER", "CLIENT", "USER", "STORE"];
+    const pick = priority.find((p) => normalizedRoles.includes(p));
+    switch (pick) {
       case "ADMIN":
-        return "/app/accountant/dashboard";
-      case "EMPRESA":
-        return "/app/accountant/dashboard";
-      case "ACCOUNTANT":
-        return "/app/accountant/dashboard";
-      case "ENCARGADO":
-        return "/app/accountant/dashboard";
-      case "ADMINISTRATIVO":
-        return "/app/accountant/dashboard";
-      case "ANALISTA":
-        return "/app/accountant/dashboard";
-      case "EMPLOYEE":
-        return "/app/accountant/dashboard";
+        return "/admin";
+      case "WAREHOUSE":
+        return "/warehouse";
+      case "CARRIER":
+        return "/carrier";
+      case "CLIENT":
       case "USER":
-        return "/app/client/dashboard";
+      case "STORE":
+        return "/user";
       default:
-        console.log("Rol desconocido, redirigiendo a login");
         return "/auth/login";
     }
   } catch (error) {
@@ -309,21 +223,21 @@ const isLocaleRoot = (pathname: string) => {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  console.log("\n--- MIDDLEWARE INICIADO ---");
+  /* console.log("\n--- MIDDLEWARE INICIADO ---");
   console.log("URL solicitada:", request.nextUrl.pathname);
   console.log("URL completa:", request.url);
-  console.log("Método:", request.method);
+  console.log("Método:", request.method); */
 
   if (pathname.startsWith("/api/")) {
-    console.log("Ruta de API detectada, bypass del middleware");
-    return NextResponse.next();
+/*     console.log("Ruta de API detectada, bypass del middleware");
+ */    return NextResponse.next();
   }
 
-  console.log("Headers:", Object.fromEntries(request.headers.entries()));
+  /* console.log("Headers:", Object.fromEntries(request.headers.entries()));
   console.log("Cookies:", {
-    authToken: !!request.cookies.get("sopy-auth-token"),
-    user: !!request.cookies.get("sopy-user"),
-  });
+  authToken: !!request.cookies.get(AUTH_COOKIE_NAME),
+  user: !!request.cookies.get(USER_COOKIE_NAME),
+  }); */
 
   if (request.method === "OPTIONS") {
     return new NextResponse(null, {
@@ -340,7 +254,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const userCookie = request.cookies.get("sopy-user");
+  const userCookie = request.cookies.get(USER_COOKIE_NAME);
     if (userCookie?.value) {
       const userData = JSON.parse(userCookie.value);
       console.log(
@@ -355,34 +269,20 @@ export async function middleware(request: NextRequest) {
   }
 
   let userData: any = null;
-  const userCookie = request.cookies.get("sopy-user");
+  const userCookie = request.cookies.get(USER_COOKIE_NAME);
   if (userCookie?.value) {
     try {
       userData = JSON.parse(userCookie.value);
-    } catch (e) { }
-  }
-
-  if (userData && userData.accessAllowed === false) {
-    if (!pathname.includes("/auth/access-denied")) {
-      const locale = pathname.split("/")[1] || "es";
-      const redirectUrl = new URL(`/${locale}/auth/access-denied`, request.url);
-      return NextResponse.redirect(redirectUrl);
+    } catch (e) {
+      console.error("Error parsing user cookie:", e);
     }
-  }
-
-  if (pathname === "/" || isLocaleRoot(pathname)) {
-    const locale =
-      pathname === "/" ? routing.defaultLocale : pathname.split("/")[1];
-
-    const redirectUrl = new URL(`/${locale}/web`, request.url);
-    return NextResponse.redirect(redirectUrl);
   }
 
   const segments = pathname.split("/");
   const locale = segments[1];
   const pathWithoutLocale = "/" + segments.slice(2).join("/");
-  console.log("Ruta sin locale:", pathWithoutLocale);
-  console.log("Segmentos de ruta:", segments);
+  /* console.log("Ruta sin locale:", pathWithoutLocale);
+  console.log("Segmentos de ruta:", segments); */
 
   if (!isModuleEnabled(pathWithoutLocale)) {
     const redirectUrl = new URL(`/${locale}/web`, request.url);
@@ -393,17 +293,17 @@ export async function middleware(request: NextRequest) {
   const intlResponse = await intlMiddleware(request);
 
   const requiresAuth = isProtectedRoute(pathWithoutLocale);
-  console.log("¿La ruta requiere autenticación?", requiresAuth);
-
+/*   console.log("¿La ruta requiere autenticación?", requiresAuth);
+ */
   const isUserAuthenticated = isAuthenticated(request);
-  console.log("¿Usuario autenticado?", isUserAuthenticated);
-
+/*   console.log("¿Usuario autenticado?", isUserAuthenticated);
+ */
   if (requiresAuth) {
-    console.log("La ruta requiere autenticación:", pathWithoutLocale);
-
+/*     console.log("La ruta requiere autenticación:", pathWithoutLocale);
+ */
     if (!isUserAuthenticated) {
-      console.log("Usuario no autenticado, redirigiendo a login...");
-
+/*       console.log("Usuario no autenticado, redirigiendo a login...");
+ */
       const redirectUrl = new URL(`/${locale}/auth/login`, request.url);
       redirectUrl.searchParams.set("from", pathWithoutLocale);
 
@@ -411,24 +311,24 @@ export async function middleware(request: NextRequest) {
     }
 
     const hasAccess = hasRequiredRole(request, pathWithoutLocale);
-    console.log("¿Tiene el usuario los permisos necesarios?", hasAccess);
-
+/*     console.log("¿Tiene el usuario los permisos necesarios?", hasAccess);
+ */
     if (!hasAccess) {
-      console.log("Usuario sin permisos suficientes para acceder a esta ruta");
-
+/*       console.log("Usuario sin permisos suficientes para acceder a esta ruta");
+ */
       const redirectPath = getRedirectPathForRole(request);
-      console.log("Redirigiendo a:", redirectPath);
-
+/*       console.log("Redirigiendo a:", redirectPath);
+ */
       const redirectUrl = new URL(`/${locale}${redirectPath}`, request.url);
 
       return NextResponse.redirect(redirectUrl);
     }
 
-    console.log("Usuario autenticado con rol válido, permitiendo acceso");
-    return intlResponse;
+/*     console.log("Usuario autenticado con rol válido, permitiendo acceso");
+ */    return intlResponse;
   } else {
-    console.log("Ruta pública, permitiendo acceso:", pathname);
-    return intlResponse;
+/*     console.log("Ruta pública, permitiendo acceso:", pathname);
+ */    return intlResponse;
   }
 }
 

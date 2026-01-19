@@ -1,6 +1,5 @@
-
 import { Package, Truck, MapPin, User } from "lucide-react"
-import { ActiveSection } from "@/app/[locale]/user/page"
+import { ActiveSection } from "@/app/[locale]/user/types"
 
 export const userStats: Array<{
   title: string;
@@ -62,3 +61,5 @@ export const userRecentActivity = [
     time: "Hace 5 horas",
   },
 ]
+
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.

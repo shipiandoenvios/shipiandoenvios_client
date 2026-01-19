@@ -1,9 +1,60 @@
+import { useStatusTranslation } from "@/packages/internationalization/useStatusTranslation"
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Truck, Package, Clock, Navigation } from "lucide-react"
-import { activeDeliveries, recentDeliveries, trackingStats, deliveryStatusColors } from "@/mocks/admin/tracking.mock"
+import { useEffect, useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getCount, fetchJson } from "@/lib/api"
+import { getPackageStatusColor } from '@/lib/status'
+import { listShipments } from '@/lib/api/shipment'
+import { PackageStatus } from '@/contracts/package'
+import { useError } from "@/hooks/use-error"
+
+const getDeliveryColor = getPackageStatusColor
 
 export function TrackingContent() {
+  const tStatus = useStatusTranslation();
+  const { error, showError, clearError } = useError();
+  const [stats, setStats] = useState<any>({ activeVehicles: 0, packagesInTransit: 0, deliveredToday: 0, averageTime: '—' });
+  const [activeDeliveriesState, setActiveDeliveriesState] = useState<any[]>([]);
+  const [recentDeliveriesState, setRecentDeliveriesState] = useState<any[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        // try aggregated endpoint first
+        const agg = await fetchJson('/api/admin/tracking').catch(() => null);
+        if (agg && mounted) {
+          setStats(agg.stats || agg);
+          setActiveDeliveriesState(agg.activeDeliveries || agg.active || []);
+          setRecentDeliveriesState(agg.recentDeliveries || agg.recent || []);
+          return;
+        }
+
+        // fallback: compute from available endpoints
+        const [vehiclesActive, inTransit, deliveredAll] = await Promise.all([
+          getCount('/api/vehicle?status=active'),
+          getCount('/api/shipment?status=in_transit'),
+          getCount('/api/shipment?status=delivered'),
+        ]);
+        if (!mounted) return;
+        setStats({ activeVehicles: vehiclesActive, packagesInTransit: inTransit, deliveredToday: deliveredAll, averageTime: '—' });
+
+        const { items: activeItems } = await listShipments({ status: PackageStatus.IN_TRANSIT, limit: 10 }).catch(() => ({ items: [] }));
+        if (mounted) setActiveDeliveriesState(activeItems);
+
+        const { items: recentItems } = await listShipments({ limit: 10, page: 1 }).catch(() => ({ items: [] }));
+        if (mounted) setRecentDeliveriesState(recentItems);
+      } catch (e: any) {
+        showError(e?.message || 'Error cargando rastreo');
+      }
+    })();
+    return () => { mounted = false };
+  }, [showError]);
+
+  const t = useTranslations('logistics');
 
   return (
     <div className="space-y-6">
@@ -22,7 +73,7 @@ export function TrackingContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Vehículos Activos</p>
-                <p className="text-3xl font-bold text-gray-900">{trackingStats.activeVehicles}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.activeVehicles}</p>
               </div>
               <Truck className="w-8 h-8 text-logistics-primary" />
             </div>
@@ -33,7 +84,7 @@ export function TrackingContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">En Ruta</p>
-                <p className="text-3xl font-bold text-gray-900">{trackingStats.packagesInTransit}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.packagesInTransit}</p>
               </div>
               <Package className="w-8 h-8 text-blue-500" />
             </div>
@@ -43,8 +94,8 @@ export function TrackingContent() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Entregados Hoy</p>
-                <p className="text-3xl font-bold text-gray-900">{trackingStats.deliveredToday}</p>
+                <p className="text-sm font-medium text-gray-600">{t('labels.deliveredToday')}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.deliveredToday}</p>
               </div>
               <Badge className="bg-green-500 text-white">Completado</Badge>
             </div>
@@ -55,7 +106,7 @@ export function TrackingContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Tiempo Promedio</p>
-                <p className="text-3xl font-bold text-gray-900">{trackingStats.averageTime}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.averageTime}</p>
               </div>
               <Clock className="w-8 h-8 text-yellow-500" />
             </div>
@@ -71,7 +122,7 @@ export function TrackingContent() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activeDeliveries.map((delivery) => (
+              {activeDeliveriesState.map((delivery: any) => (
                 <div key={delivery.id} className="p-4 bg-gray-50 rounded-lg border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -81,11 +132,7 @@ export function TrackingContent() {
                         {delivery.vehicle}
                       </Badge>
                     </div>
-                    <Badge
-                      className={`${deliveryStatusColors[delivery.status as keyof typeof deliveryStatusColors] || deliveryStatusColors.default} text-white`}
-                    >
-                      {delivery.status}
-                    </Badge>
+                    <Badge className={`${getDeliveryColor(delivery.status)} text-white`}>{tStatus.status(delivery.status)}</Badge>
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-gray-700">
@@ -110,57 +157,8 @@ export function TrackingContent() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Recent Deliveries */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-900">Entregas Recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentDeliveries.map((delivery) => (
-                <div
-                  key={delivery.id}
-                  className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                      <Package className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{delivery.id}</p>
-                      <p className="text-sm text-gray-600">{delivery.client}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge className="bg-green-500 text-white mb-1">{delivery.status}</Badge>
-                    <p className="text-sm text-gray-600">{delivery.time}</p>
-                    <p className="text-xs text-gray-500">{delivery.location}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Map Placeholder */}
-      <Card className="border-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-gray-900">Mapa de Rastreo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">Mapa de Rastreo en Tiempo Real</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Aquí se mostraría el mapa interactivo con las ubicaciones de los vehículos
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
-  )
+  );
 }
+

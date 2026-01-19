@@ -2,7 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, MapPin, Navigation, Target } from "lucide-react"
-import { stats, nextDeliveries, userInfo } from "@/mocks/carrier";
+import { getCount, fetchJson } from "@/lib/api";
+import { listShipments } from "@/lib/api/shipment";
+import { useError } from "@/hooks/use-error";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type PriorityType = "Express" | "Urgente" | "Normal";
 
@@ -19,101 +24,137 @@ export function CarrierDashboardContent() {
         return "bg-gray-500"
     }
   }
+  const { error, showError, clearError } = useError();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{ name?: string; pendingPackages?: number } | null>(null);
+  const [statsVals, setStatsVals] = useState<{ title: string; value: number; color: string; icon: any }[]>([]);
+  const [deliveries, setDeliveries] = useState<any[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      clearError();
+      try {
+        try {
+          const u = await fetchJson('/api/user/me');
+          if (mounted) setUser({ name: u?.name ?? u?.username ?? 'Repartidor', pendingPackages: u?.pendingPackages ?? 0 });
+        } catch (e: any) {
+          if (mounted) setUser({ name: 'Repartidor', pendingPackages: 0 });
+        }
+
+        const [assignedCount, deliveredCount, totalShipments] = await Promise.all([
+          getCount('/api/shipment?status=assigned'),
+          getCount('/api/shipment?status=delivered'),
+          getCount('/api/shipment')
+        ]);
+
+        if (mounted) {
+          setStatsVals([
+            { title: 'Pendientes', value: assignedCount, color: 'text-logistics-primary', icon: MapPin },
+            { title: 'Entregados', value: deliveredCount, color: 'text-green-500', icon: CheckCircle },
+            { title: 'Total viajes', value: totalShipments, color: 'text-gray-700', icon: Target },
+            { title: "Mi próxima", value: 0, color: 'text-blue-500', icon: Navigation }
+          ]);
+        }
+
+        try {
+          const { items: deliveriesList } = await listShipments({ limit: 5, page: 1 });
+          if (mounted) setDeliveries((deliveriesList || []).slice(0, 5));
+        } catch (e: any) {
+          if (mounted) setDeliveries([]);
+        }
+      } catch (err: any) {
+        showError(err?.message ?? 'Error cargando datos');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [clearError, showError]);
 
   return (
     <div className="space-y-8 p-6">
-      {/* Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Mi Jornada</h1>
-        {userInfo.pendingPackages === 0 ? (
-          <p className="text-xl text-gray-600">¡Todas las entregas completadas! Buen trabajo, {userInfo.name}.</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Panel de Repartidor</h1>
+        <p className="text-xl text-gray-600">Bienvenido al sistema de gestión SHIPIANDO</p>
+      </div>
+      {error && <ErrorMessage message={error} className="mb-4" />}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {loading ? (
+          [1, 2, 3, 4].map((i) => (
+            <Card key={i} className="text-center border-0 shadow-lg">
+              <CardContent className="p-6">
+                <Skeleton className="h-8 w-8 mx-auto mb-2" />
+                <Skeleton className="h-4 w-24 mx-auto mb-1" />
+                <Skeleton className="h-6 w-16 mx-auto" />
+              </CardContent>
+            </Card>
+          ))
         ) : (
-          <p className="text-xl text-gray-600">Bienvenido {userInfo.name}, tienes {userInfo.pendingPackages} entregas pendientes</p>
+          statsVals.map((stat, i) => (
+            <Card key={i} className="text-center border-0 shadow-lg">
+              <CardContent className="p-6">
+                {stat.icon && <stat.icon className={`w-8 h-8 mx-auto mb-2 ${stat.color}`} />}
+                <div className="text-lg font-semibold">{stat.title}</div>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))
         )}
       </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index} className="text-center border-0 shadow-lg">
-            <CardContent className="p-6">
-              <stat.icon className={`w-12 h-12 ${stat.color} mx-auto mb-4`} />
-              <p className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</p>
-              <p className="text-sm text-gray-600">{stat.title}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <Card className="border-0 shadow-lg bg-logistics-primary text-white">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold flex items-center gap-2">
-            <Target className="w-6 h-6" />
-            Acciones Rápidas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="secondary" className="h-16 bg-white/20 hover:bg-white/30 text-white border-white/30">
-              <MapPin className="w-6 h-6 mr-3" />
-              <div className="text-left">
-                <p className="font-medium">Ver Mi Ruta</p>
-                <p className="text-xs opacity-80">{userInfo.pendingPackages} paradas restantes</p>
-              </div>
-            </Button>
-            <Button variant="secondary" className="h-16 bg-white/20 hover:bg-white/30 text-white border-white/30">
-              <CheckCircle className="w-6 h-6 mr-3" />
-              <div className="text-left">
-                <p className="font-medium">Entregar Paquete</p>
-                <p className="text-xs opacity-80">Escanear código</p>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Next Deliveries */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <MapPin className="w-6 h-6 text-logistics-primary" />
-            Próximas Entregas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {nextDeliveries.map((delivery) => (
-              <div key={delivery.id} className="p-4 bg-gray-50 rounded-lg border-l-4 border-l-logistics-primary">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-logistics-primary">{delivery.id}</span>
-                    <Badge className={`${getPriorityColor(delivery.priority as PriorityType)} text-white`}>{delivery.priority}</Badge>
-                  </div>
-                  <p className="text-sm text-gray-500">{delivery.distance}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="font-medium text-gray-900">{delivery.recipient}</p>
-                  <div className="flex items-start gap-1">
-                    <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-gray-600">{delivery.address}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <Button size="sm" className="flex-1 bg-logistics-primary hover:bg-logistics-primary/90 text-white">
-                    <Navigation className="w-4 h-4 mr-2" />
-                    Ir Ahora
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Entregar
-                  </Button>
-                </div>
-              </div>
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Mis Entregas</h2>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="border-0 shadow-md">
+                <CardContent className="p-4">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-4 w-24 mb-1" />
+                  <Skeleton className="h-3 w-20" />
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        ) : deliveries.length === 0 ? (
+          <div className="text-gray-500">No hay entregas asignadas.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {deliveries.map((delivery) => (
+              <Card key={delivery.id ?? delivery.trackingId} className="border-0 shadow-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-logistics-primary">{delivery.id ?? delivery.trackingId ?? '—'}</span>
+                      <Badge className={`${getPriorityColor((delivery.priority as PriorityType) ?? 'Normal')} text-white`}>{delivery.priority ?? 'Normal'}</Badge>
+                    </div>
+                    <p className="text-sm text-gray-500">{delivery.distance ?? delivery.eta ?? ''}</p>
+                  </div>
+                  <div className="space-y-1 mt-2">
+                    <p className="font-medium text-gray-900">{delivery.recipientName ?? delivery.recipient ?? delivery.customerName ?? '—'}</p>
+                    <div className="flex items-start gap-1">
+                      <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-gray-600">{delivery.address ?? delivery.destination ?? '—'}</p>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button size="sm" className="flex-1 bg-logistics-primary hover:bg-logistics-primary/90 text-white">
+                        <Navigation className="w-4 h-4 mr-2" />
+                        Ir Ahora
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Entregar
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

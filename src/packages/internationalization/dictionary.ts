@@ -1,4 +1,3 @@
-import "server-only";
 import type en from "./dictionaries/en.json";
 import languine from "./languine.json";
 
@@ -17,9 +16,7 @@ const dictionaries = locales.reduce<Dictionaries>((acc, locale) => {
 }, {} as Dictionaries);
 
 export const getDictionary = async (locale: string): Promise<Dictionary> => {
-  // Verifica si el idioma solicitado está en la lista de idiomas disponibles
   if (!locales.includes(locale as (typeof locales)[number])) {
-    // Si no está disponible, usa el idioma por defecto
     locale = languine.locale.source;
   }
 

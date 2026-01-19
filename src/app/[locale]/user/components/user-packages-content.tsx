@@ -4,39 +4,84 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Package, Search } from "lucide-react"
-import { ActiveSection } from "@/app/[locale]/user/page"
-import { packages, packageStatusIcons, packageStatusColors, PackageData, TrackingData, defaultTrackingTimeline, defaultCurrentLocation } from "@/mocks/user"
+import { Package, Search, CheckCircle, Truck } from "lucide-react"
+import { ActiveSection } from "@/app/[locale]/user/types"
+import { getPackageStatusColor } from '@/lib/status'
+import { PackageData, PackageStatus, TrackingEventType } from "@/contracts/package"
+import { TrackingData } from "@/app/[locale]/user/types"
+import { useStatusTranslation } from "@/packages/internationalization/useStatusTranslation"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useCallback, Dispatch, SetStateAction } from "react"
+import { useError } from "@/hooks/use-error"
+import { ErrorMessage } from "@/components/ui/error-message"
+import { usePagination } from "@/hooks/use-pagination"
+import { Pagination } from "@/components/ui/pagination"
+import { getApiUrl } from "@/packages/config"
+import { appendPaginationToUrl } from '@/lib/pagination'
+import { listPackages } from '@/lib/api/package'
 
 interface UserPackagesContentProps {
-  setSelectedPackage: (pkg: TrackingData) => void
+  setSelectedPackage: Dispatch<SetStateAction<TrackingData | null>>
   setActiveSection: (section: ActiveSection) => void
 }
 
 export function UserPackagesContent({ setSelectedPackage, setActiveSection }: UserPackagesContentProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const convertToTrackingData = (pkg: PackageData): TrackingData => {
-    return {
-      ...pkg,
-      estimatedDate: pkg.date,
-      currentLocation: defaultCurrentLocation,
-      timeline: defaultTrackingTimeline,
-    };
-  }
+  const tStatus = useStatusTranslation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [packages, setPackages] = useState<PackageData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { error, showError, clearError } = useError();
+  const { page, setPage, limit, setLimit, total, pages, setMeta } = usePagination({ initialLimit: 20 });
 
-  const getStatusIcon = (status: PackageData["status"]) => {
-    const Icon = packageStatusIcons[status] || Package
-    const color = packageStatusColors[status] || packageStatusColors["default"]
-    return <Icon className={`w-5 h-5 ${color.replace('bg-', 'text-')}`} />
-  }
+  const fetchPackages = useCallback(async () => {
+    setLoading(true);
+    clearError();
+    try {
+      const { items, pagination } = await listPackages({ page, limit, search: searchTerm });
+      setPackages(items);
+      setMeta({ total: pagination?.total || 0 });
+    } catch (err) {
+      showError("Error de conexión. Intenta de nuevo más tarde.");
+      setPackages([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit, searchTerm, setMeta, showError, clearError]);
 
-  const getStatusColor = (status: PackageData["status"]) => packageStatusColors[status] || packageStatusColors["default"]
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
 
-  const filteredPackages = packages.filter(
-    (pkg) =>
-      pkg.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pkg.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const convertToTrackingData = (pkg: PackageData): TrackingData => ({
+    id: pkg.trackingCode ?? pkg.id,
+    code: pkg.trackingCode ?? pkg.id,
+    shipmentId: pkg.shipmentId,
+    description: pkg.description ?? "",
+    sender: undefined,
+    status: pkg.status as PackageStatus,
+    date: pkg.lastStatusAt ?? pkg.lastScanAt ?? new Date().toISOString(),
+    createdAt: pkg.lastStatusAt ?? pkg.lastScanAt ?? new Date().toISOString(),
+    progress: 0,
+    estimatedDate: undefined,
+    currentLocation: (pkg as any).zone ?? undefined,
+    location: (pkg as any).zone ?? undefined,
+    timeline: [],
+  });
+
+  const getStatusIcon = (status: PackageStatus) => {
+    // Map PackageStatus to display icon
+    switch (status) {
+      case PackageStatus.DELIVERED:
+        return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case PackageStatus.OUT_FOR_DELIVERY:
+      case PackageStatus.IN_TRANSIT:
+        return <Truck className="w-5 h-5 text-blue-500" />;
+      default:
+        return <Package className="w-5 h-5 text-gray-400" />;
+    }
+  };
+
+  const getStatusColor = (status: PackageStatus) => getPackageStatusColor(status)
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -54,75 +99,93 @@ export function UserPackagesContent({ setSelectedPackage, setActiveSection }: Us
             <Input
               placeholder="Buscar por código o descripción..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
               className="pl-12 h-12 text-lg"
             />
           </div>
         </CardContent>
       </Card>
 
+
+      {/* Error Message */}
+  {error && <ErrorMessage message={error || ''} className="mb-4" />}
       {/* Packages List */}
       <div className="space-y-4">
-        {filteredPackages.map((pkg) => (
-          <Card key={pkg.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon(pkg.status)}
-                  <div>
-                    <div className="font-semibold text-logistics-primary text-lg">{pkg.id}</div>
-                    <div className="text-gray-900 font-medium">{pkg.description}</div>
-                    <div className="text-gray-600 text-sm">De: {pkg.sender}</div>
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10" />
+                      <div>
+                        <Skeleton className="h-5 w-32 mb-2" />
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-3 w-24 mt-2" />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Skeleton className="h-6 w-20 mb-2" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-3 w-full mb-4" />
+                  <div className="flex gap-3">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : error ? null : packages.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">No se encontraron paquetes.</div>
+        ) : (
+          packages.map((pkg) => (
+            <Card key={pkg.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Package className="w-10 h-10 text-gray-500" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{pkg.trackingCode ?? pkg.id}</h3>
+                      <p className="text-sm text-gray-600">{pkg.description}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge className={`${getStatusColor(pkg.status as PackageStatus)} text-white`}>{tStatus.status(pkg.status as PackageStatus)}</Badge>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge className={`${getStatusColor(pkg.status)} text-white mb-2`}>{pkg.status}</Badge>
-                  <div className="text-sm text-gray-600">{pkg.date}</div>
+                <p className="text-sm text-gray-500 mb-4">Última actualización: {pkg.date}</p>
+                <div className="flex gap-3">
+                  <Button onClick={() => { setSelectedPackage(convertToTrackingData(pkg)); setActiveSection("tracking"); }} className="flex-1 bg-logistics-primary hover:bg-logistics-primary/90 text-white">
+                    <Search className="w-4 h-4 mr-2" />
+                    Ver Seguimiento
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedPackage(convertToTrackingData(pkg));
+                      setActiveSection("detail");
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    Ver Detalle
+                  </Button>
                 </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Progreso</span>
-                  <span>{pkg.progress}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full ${pkg.status === "Entregado" ? "bg-green-500" : "bg-logistics-primary"}`}
-                    style={{ width: `${pkg.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => {
-                    setSelectedPackage(convertToTrackingData(pkg))
-                    setActiveSection("tracking")
-                  }}
-                  className="flex-1 bg-logistics-primary hover:bg-logistics-primary/90"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Ver Seguimiento
-                </Button>
-                <Button
-                  onClick={() => {
-                    setSelectedPackage(convertToTrackingData(pkg))
-                    setActiveSection("detail")
-                  }}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  Ver Detalle
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination page={page} pages={pages} setPage={setPage} />
     </div>
-  )
+  );
 }

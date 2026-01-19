@@ -5,9 +5,46 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Settings, DollarSign, MapPin, Bell, Users, Save } from "lucide-react"
-import { priceSettings, zoneSettings, notificationSettings, userRoleSettings, shipmentStatusSettings } from "@/mocks/admin/settings.mock"
+import { useEffect, useState } from "react"
+import { fetchJson } from "@/lib/api"
+
+const defaultPriceSettings = { basePrice: 1.0, pricePerKg: 0.5, expressMultiplier: 1.5, zonePricing: [] }
+const defaultZoneSettings = { defaultZone: { name: '', postalCodes: '', deliveryTime: 24 } }
+const defaultNotificationSettings = { emailNotifications: false, smsNotifications: false, delayAlerts: false, deliveryConfirmations: false }
+const defaultUserRoleSettings = { adminRoles: [], operatorRoles: [], driverRoles: [] }
+const defaultShipmentStatusSettings = { defaultStatuses: [] }
+
 
 export function SettingsContent() {
+  const [priceSettings, setPriceSettings] = useState<any>(defaultPriceSettings)
+  const [zoneSettings, setZoneSettings] = useState<any>(defaultZoneSettings)
+  const [notificationSettings, setNotificationSettings] = useState<any>(defaultNotificationSettings)
+  const [userRoleSettings, setUserRoleSettings] = useState<any>(defaultUserRoleSettings)
+  const [shipmentStatusSettings, setShipmentStatusSettings] = useState<any>(defaultShipmentStatusSettings)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await fetchJson('/api/admin/settings').catch(() => null)
+        if (!mounted) return
+        if (res) {
+          setPriceSettings(res.priceSettings || res.price || defaultPriceSettings)
+          setZoneSettings(res.zoneSettings || res.zones || defaultZoneSettings)
+          setNotificationSettings(res.notificationSettings || defaultNotificationSettings)
+          setUserRoleSettings(res.userRoleSettings || defaultUserRoleSettings)
+          setShipmentStatusSettings(res.shipmentStatusSettings || defaultShipmentStatusSettings)
+        }
+      } catch {
+        if (mounted) {
+          setPriceSettings(defaultPriceSettings)
+          setZoneSettings(defaultZoneSettings)
+          setNotificationSettings(defaultNotificationSettings)
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -47,7 +84,7 @@ export function SettingsContent() {
                   <SelectValue placeholder="Configurar zonas" />
                 </SelectTrigger>
                 <SelectContent>
-                  {priceSettings.zonePricing.map((zone) => (
+                  {priceSettings.zonePricing.map((zone: any) => (
                     <SelectItem key={zone.value} value={zone.value}>{zone.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -139,7 +176,7 @@ export function SettingsContent() {
                   <SelectValue placeholder="Permisos completos" />
                 </SelectTrigger>
                 <SelectContent>
-                  {userRoleSettings.adminRoles.map((role) => (
+                  {userRoleSettings.adminRoles.map((role: any) => (
                     <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -152,7 +189,7 @@ export function SettingsContent() {
                   <SelectValue placeholder="Gestión de envíos" />
                 </SelectTrigger>
                 <SelectContent>
-                  {userRoleSettings.operatorRoles.map((role) => (
+                  {userRoleSettings.operatorRoles.map((role: any) => (
                     <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -165,7 +202,7 @@ export function SettingsContent() {
                   <SelectValue placeholder="Solo entregas asignadas" />
                 </SelectTrigger>
                 <SelectContent>
-                  {userRoleSettings.driverRoles.map((role) => (
+                  {userRoleSettings.driverRoles.map((role: any) => (
                     <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -188,7 +225,7 @@ export function SettingsContent() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {shipmentStatusSettings.defaultStatuses.map((status) => (
+            {shipmentStatusSettings.defaultStatuses.map((status: any) => (
               <div key={status.id} className="space-y-2">
                 <Label htmlFor={status.id}>Estado {status.id.split('-')[1]}</Label>
                 <Input id={status.id} placeholder={status.placeholder} className="rounded-lg" />

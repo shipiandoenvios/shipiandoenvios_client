@@ -1,51 +1,43 @@
+// Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.
+
 export const priceSettings = {
-    basePrice: 5.00,
-    pricePerKg: 1.50,
-    expressMultiplier: 1.5,
+    basePrice: 0,
+    pricePerKg: 0,
+    expressMultiplier: 1,
     zonePricing: [
-        { value: "local", label: "Local - $500" },
-        { value: "regional", label: "AMBA - $800" },
-        { value: "national", label: "Interior - $1200" },
+        { value: "", label: "" },
     ]
 }
 
 export const zoneSettings = {
     defaultZone: {
-        name: "Microcentro",
-        postalCodes: "C1001, C1002, C1003",
-        deliveryTime: 24
+        name: "",
+        postalCodes: "",
+        deliveryTime: 0
     }
 }
 
 export const notificationSettings = {
     emailNotifications: false,
     smsNotifications: false,
-    delayAlerts: true,
-    deliveryConfirmations: true
+    delayAlerts: false,
+    deliveryConfirmations: false
 }
 
 export const userRoleSettings = {
     adminRoles: [
-        { value: "full", label: "Permisos completos" },
-        { value: "limited", label: "Permisos limitados" },
-        { value: "readonly", label: "Solo lectura" }
+        { value: "", label: "" },
     ],
     operatorRoles: [
-        { value: "shipments", label: "Gestión de envíos" },
-        { value: "clients", label: "Gestión de clientes" },
-        { value: "both", label: "Ambos" }
+        { value: "", label: "" },
     ],
     driverRoles: [
-        { value: "assigned", label: "Solo entregas asignadas" },
-        { value: "zone", label: "Toda la zona" }
+        { value: "", label: "" },
     ]
 }
 
 export const shipmentStatusSettings = {
     defaultStatuses: [
-        { id: "status-1", placeholder: "Pendiente" },
-        { id: "status-2", placeholder: "En tránsito" },
-        { id: "status-3", placeholder: "Entregado" },
-        { id: "status-4", placeholder: "Cancelado" }
+        { id: "", placeholder: "" },
     ]
 }

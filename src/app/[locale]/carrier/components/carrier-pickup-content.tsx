@@ -6,13 +6,42 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { QrCode, Package, CheckCircle, AlertTriangle } from "lucide-react"
-import { assignedPackages, Package as IPackage } from "@/mocks/carrier"
+import { useEffect } from "react"
+import { listShipments } from "@/lib/api/shipment"
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { useTranslations } from 'next-intl'
+import { getPackageStatusColor } from '@/lib/status'
+import { PackageStatus } from '@/contracts/package'
+
+type IPackage = {
+  id: string;
+  status?: PackageStatus;
+  priority?: string;
+  recipient?: string;
+  destination?: string;
+  weight?: string;
+}
 
 
 
 export function CarrierPickupContent() {
+  const tStatus = useStatusTranslation();
   const [selectedPackages, setSelectedPackages] = useState<string[]>([])
   const [scanMode, setScanMode] = useState(false)
+  const [assignedPackages, setAssignedPackages] = useState<IPackage[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const { items } = await listShipments({ assignedTo: 'me', limit: 200 }).catch(() => ({ items: [] }))
+        if (mounted) setAssignedPackages(items)
+      } catch {
+        if (mounted) setAssignedPackages([])
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
 
 
@@ -31,18 +60,7 @@ export function CarrierPickupContent() {
     setSelectedPackages([])
   }
 
-  const getStatusColor = (status: IPackage["status"]): string => {
-    switch (status) {
-      case "Listo":
-        return "bg-green-500"
-      case "Retirado":
-        return "bg-blue-500"
-      case "Falta":
-        return "bg-red-500"
-      default:
-        return "bg-gray-500"
-    }
-  }
+  const getStatusColor = (status: IPackage["status"]): string => getPackageStatusColor(status)
 
   const getPriorityColor = (priority: IPackage["priority"]): string => {
     switch (priority) {
@@ -57,14 +75,16 @@ export function CarrierPickupContent() {
     }
   }
 
-  const readyPackages = assignedPackages.filter((pkg) => pkg.status === "Listo")
+  const readyPackages = assignedPackages.filter((pkg) => pkg.status === PackageStatus.AWAITING_CHECKIN)
+
+  const t = useTranslations('logistics');
 
   return (
     <div className="space-y-8 p-6">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Retiro de Paquetes</h1>
-        <p className="text-xl text-gray-600">Confirma el retiro de {assignedPackages.length} paquetes asignados</p>
+  <p className="text-xl text-gray-600">Confirma el retiro de {assignedPackages.length} paquetes asignados</p>
       </div>
 
       {/* Stats */}
@@ -73,23 +93,23 @@ export function CarrierPickupContent() {
           <CardContent className="p-6">
             <Package className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <p className="text-3xl font-bold text-gray-900 mb-2">{readyPackages.length}</p>
-            <p className="text-sm text-gray-600">Listos</p>
+            <p className="text-sm text-gray-600">{tStatus.status(PackageStatus.AWAITING_CHECKIN)}</p>
           </CardContent>
         </Card>
         <Card className="text-center border-0 shadow-lg">
           <CardContent className="p-6">
             <CheckCircle className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <p className="text-3xl font-bold text-gray-900 mb-2">
-              {assignedPackages.filter((p) => p.status === "Retirado").length}
+              {assignedPackages.filter((p) => p.status === PackageStatus.OUT_FOR_DELIVERY).length}
             </p>
-            <p className="text-sm text-gray-600">Retirados</p>
+            <p className="text-sm text-gray-600">{tStatus.status(PackageStatus.OUT_FOR_DELIVERY)}</p>
           </CardContent>
         </Card>
         <Card className="text-center border-0 shadow-lg">
           <CardContent className="p-6">
             <AlertTriangle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <p className="text-3xl font-bold text-gray-900 mb-2">0</p>
-            <p className="text-sm text-gray-600">Faltan</p>
+            <p className="text-3xl font-bold text-gray-900 mb-2">{assignedPackages.filter((p) => p.status === PackageStatus.EXCEPTION).length}</p>
+            <p className="text-sm text-gray-600">{tStatus.status(PackageStatus.EXCEPTION)}</p>
           </CardContent>
         </Card>
       </div>
@@ -160,21 +180,20 @@ export function CarrierPickupContent() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {assignedPackages.map((pkg) => (
+            {assignedPackages.map((pkg: IPackage) => (
               <div
                 key={pkg.id}
-                className={`p-4 rounded-lg border-l-4 ${pkg.status === "Listo"
+                className={`p-4 rounded-lg border-l-4 ${pkg.status === PackageStatus.AWAITING_CHECKIN
                     ? selectedPackages.includes(pkg.id)
                       ? "bg-green-100 border-l-green-500"
                       : "bg-green-50 border-l-green-500"
-                    : pkg.status === "Retirado"
+                    : pkg.status === PackageStatus.OUT_FOR_DELIVERY
                       ? "bg-blue-50 border-l-blue-500"
                       : "bg-red-50 border-l-red-500"
-                  }`}
-              >
+                    }`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    {!scanMode && pkg.status === "Listo" && (
+                    {!scanMode && pkg.status === PackageStatus.AWAITING_CHECKIN && (
                       <Checkbox
                         checked={selectedPackages.includes(pkg.id)}
                         onCheckedChange={() => handleSelectPackage(pkg.id)}
@@ -188,7 +207,7 @@ export function CarrierPickupContent() {
                       <p className="font-medium text-gray-900">{pkg.recipient}</p>
                     </div>
                   </div>
-                  <Badge className={`${getStatusColor(pkg.status)} text-white`}>{pkg.status}</Badge>
+                      <Badge className={`${getStatusColor(pkg.status)} text-white`}>{tStatus.status(pkg.status ?? "")}</Badge>
                 </div>
 
                 <div className="space-y-1 text-sm text-gray-600">
@@ -211,7 +230,7 @@ export function CarrierPickupContent() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-xl mb-2">Confirmar Retiro</h3>
+                <h3 className="font-semibold text-xl mb-2">{t('labels.confirmPickupTitle')}</h3>
                 <p className="opacity-90">{selectedPackages.length} paquetes seleccionados para retirar</p>
               </div>
               <Button

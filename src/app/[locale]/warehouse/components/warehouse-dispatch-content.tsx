@@ -3,14 +3,17 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { warehouseDispatchCarriers, warehouseDispatchPackages, warehouseDispatchStatusIconMap } from "@/mocks/warehouse"
-import { Search } from "lucide-react"
+import { Search, CheckCircle, Navigation, Truck } from "lucide-react"
+import { useEffect } from "react"
+import { fetchJson, extractList } from "@/lib/api"
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { PackageStatus } from '@/contracts/package'
 
 interface PackageData {
   id: string
   description: string
   sender: string
-  status: "Entregado" | "En reparto" | "En tránsito"
+  status: PackageStatus
   date: string
   progress: number
   zone: string
@@ -20,14 +23,42 @@ interface PackageData {
 }
 
 export function WarehouseDispatchContent() {
+  const tStatus = useStatusTranslation();
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPackages, setSelectedPackages] = useState<PackageData["id"][]>([])
   const [selectedCarrier, setSelectedCarrier] = useState("")
+  const [carriers, setCarriers] = useState<any[]>([])
+  const [packages, setPackages] = useState<PackageData[]>([])
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [cRes, pRes] = await Promise.all([
+          fetchJson('/api/carrier?limit=50').catch(() => []),
+          fetchJson('/api/inventory?status=ready&limit=200').catch(() => []),
+        ])
+        if (!mounted) return
+        const cList = extractList(cRes)
+        const pList = extractList(pRes)
+        setCarriers(cList.items)
+        setPackages(pList.items)
+      } catch {
+        if (mounted) {
+          setCarriers([])
+          setPackages([])
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
-  const carriers = warehouseDispatchCarriers
-  const packages = warehouseDispatchPackages
-  const getStatusIcon = (status: string) => {
-    const mapping = warehouseDispatchStatusIconMap[status as keyof typeof warehouseDispatchStatusIconMap]
+  const getStatusIcon = (status: PackageData['status']) => {
+    const map: Record<string, { icon: any; color: string }> = {
+      [PackageStatus.DELIVERED]: { icon: CheckCircle, color: 'text-green-600' },
+      [PackageStatus.OUT_FOR_DELIVERY]: { icon: Navigation, color: 'text-blue-500' },
+      [PackageStatus.IN_TRANSIT]: { icon: Truck, color: 'text-blue-500' },
+    }
+    const mapping = map[status ?? ''] || null
     if (!mapping) return null
     const Icon = mapping.icon
     return <Icon className={`w-5 h-5 ${mapping.color}`} />
@@ -128,7 +159,7 @@ export function WarehouseDispatchContent() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">{pkg.status}</div>
+                <div className="text-sm font-medium text-gray-900">{pkg.status ? tStatus.status(pkg.status) : ''}</div>
                 <div className="text-sm text-gray-600">{pkg.date}</div>
                 <div className="text-sm text-gray-600">{pkg.destination}</div>
               </div>

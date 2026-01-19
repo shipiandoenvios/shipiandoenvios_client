@@ -3,28 +3,9 @@
 import { useState } from "react"
 import { UserAddressesContent, UserDashboardContent, UserDetailContent, UserPackagesContent, UserProfileContent, UserSidebar, UserTrackingContent } from "./components"
 import { Package, Menu } from "lucide-react"
+import { PackageStatus } from '@/contracts/package'
 import { SidebarProvider } from "@/components/ui/sidebar"
-
-export type ActiveSection = "dashboard" | "packages" | "addresses" | "profile" | "tracking" | "detail"
-
-interface TimelineEvent {
-  status: string
-  date: string
-  completed: boolean
-  current?: boolean
-}
-
-interface TrackingData {
-  id: string
-  description: string
-  sender: string
-  status: "Entregado" | "En reparto" | "En tránsito"
-  date: string
-  progress: number
-  estimatedDate: string
-  currentLocation: string
-  timeline: TimelineEvent[]
-}
+import { TrackingData, ActiveSection } from './types'
 
 export default function UserPage() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("dashboard")

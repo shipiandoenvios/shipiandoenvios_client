@@ -5,12 +5,44 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { warehouseSettingsAuthorizedUsers, warehouseSettingsZones } from "@/mocks/warehouse/settings.mock"
+import { DriverStatus } from '@/contracts/user'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
 import { Settings, Users, MapPin, Package, Save } from "lucide-react"
+import { useEffect, useState } from "react"
+import { fetchJson, extractList } from "@/lib/api"
+
+type AuthorizedUser = { id: string; name: string; role: string; shift?: string; status?: DriverStatus | string };
+type Zone = { id: string; name: string; areas: string[] };
 
 export function WarehouseSettingsContent() {
-  const authorizedUsers = warehouseSettingsAuthorizedUsers
-  const zones = warehouseSettingsZones
+  const [authorizedUsers, setAuthorizedUsers] = useState<AuthorizedUser[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        // Try to use existing backend endpoints: inventory/warehouse controllers.
+        // Backend exposes /api/warehouse (list) and /api/inventory. Attempt to read settings from /api/warehouse
+        const res = await fetchJson('/api/warehouse').catch(() => null);
+        if (!mounted) return;
+        if (res) {
+          const { items } = extractList(res);
+          const data = items?.[0] ?? res?.data ?? res;
+          setAuthorizedUsers(data?.authorizedUsers || data?.users || []);
+          setZones(data?.zones || []);
+        }
+      } catch {
+        if (mounted) {
+          setAuthorizedUsers([]);
+          setZones([]);
+        }
+      }
+    })();
+    return () => { mounted = false };
+  }, []);
+
+  const tStatus = useStatusTranslation();
 
   return (
     <div className="space-y-8 p-6">
@@ -105,7 +137,7 @@ export function WarehouseSettingsContent() {
                       {user.role} - {user.shift}
                     </p>
                   </div>
-                  <Badge className={user.status === "Activo" ? "bg-green-500" : "bg-gray-500"}>{user.status}</Badge>
+                  <Badge className={user.status === DriverStatus.ACTIVE ? "bg-green-500" : "bg-gray-500"}>{tStatus.driver(user.status ?? "")}</Badge>
                 </div>
               ))}
             </div>

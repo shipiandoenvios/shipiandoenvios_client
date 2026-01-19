@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, Package, Clock, MapPin, CheckCircle, Truck } from "lucide-react"
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { PackageStatus, TrackingEventType } from '@/contracts/package'
 
 interface TimelineEvent {
-  status: string;
+  status: TrackingEventType;
   timestamp: string;
   responsible: string;
   location: string;
@@ -16,7 +18,7 @@ interface TimelineEvent {
 
 interface PackageHistory {
   id: string;
-  currentStatus: string;
+  currentStatus: PackageStatus;
   carrier: string;
   recipient: string;
   destination: string;
@@ -24,36 +26,37 @@ interface PackageHistory {
 }
 
 export function WarehouseTrackingContent() {
+  const tStatus = useStatusTranslation();
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPackage, setSelectedPackage] = useState<PackageHistory | null>(null)
 
   const packageHistory: PackageHistory = {
     id: "TRK-001234",
-    currentStatus: "En ruta con cartero",
+    currentStatus: PackageStatus.OUT_FOR_DELIVERY,
     carrier: "Roberto Sánchez",
     recipient: "María García",
     destination: "Palermo",
-    timeline: [
+      timeline: [
       {
-        status: "Recibido en depósito",
+        status: TrackingEventType.CREATED,
         timestamp: "2024-01-15 14:30",
         responsible: "Ana López",
         location: "Depósito Central",
       },
       {
-        status: "En depósito",
+        status: TrackingEventType.IN_WAREHOUSE,
         timestamp: "2024-01-15 14:31",
         responsible: "Sistema",
         location: "Depósito Central - Zona A",
       },
       {
-        status: "Despachado",
+        status: TrackingEventType.HUB_TRANSFER,
         timestamp: "2024-01-16 09:15",
         responsible: "Carlos Mendoza",
         location: "Depósito Central",
       },
       {
-        status: "En ruta con cartero",
+        status: TrackingEventType.OUT_FOR_DELIVERY,
         timestamp: "2024-01-16 09:30",
         responsible: "Roberto Sánchez",
         location: "Zona Norte",
@@ -127,7 +130,7 @@ export function WarehouseTrackingContent() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl font-semibold text-gray-900">Tracking: {selectedPackage.id}</CardTitle>
-              <Badge className="bg-logistics-primary text-white">{selectedPackage.currentStatus}</Badge>
+              <Badge className="bg-logistics-primary text-white">{tStatus.status(selectedPackage.currentStatus)}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -159,7 +162,7 @@ export function WarehouseTrackingContent() {
                     </div>
                     <div className="flex-1 pb-4">
                       <div className="flex items-center justify-between mb-1">
-                        <h5 className="font-medium text-gray-900">{event.status}</h5>
+                        <h5 className="font-medium text-gray-900">{tStatus.trackingEvent(event.status)}</h5>
                         <span className="text-sm text-gray-500">{event.timestamp}</span>
                       </div>
                       <div className="space-y-1 text-sm text-gray-600">

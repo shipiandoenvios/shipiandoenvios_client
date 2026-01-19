@@ -16,6 +16,7 @@ import {
 import { RegisterFormValues, registerSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
 import { getApiUrl } from "@/packages/config";
+import { fetchJson } from '@/lib/api';
 import { LocationAutocomplete } from "./LocationAutocomplete";
 import { UserInfo } from "@/store/store";
 
@@ -63,16 +64,13 @@ export function RegisterForm() {
     setError(null);
 
     try {
-      const response = await fetch(getApiUrl(`/api/auth/register`), {
+      const result = await fetchJson(getApiUrl(`/api/auth/register`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-        credentials: "include",
-      });
-
-      const result = await response.json() as RegisterResponse;
+      }) as RegisterResponse;
 
       if (!result.success) {
         setError(result.message || "Error al registrarse");

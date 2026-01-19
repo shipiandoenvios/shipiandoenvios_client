@@ -1,8 +1,7 @@
 "use client";
-
 import { Button } from "@/packages/design-system/components/ui/button";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/packages/internationalization";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/packages/design-system/lib/utils";
@@ -16,7 +15,6 @@ export default function Header() {
   const [productoOpen, setProductoOpen] = useState(false);
   const productoRef = useRef<HTMLDivElement>(null);
 
-  // Detectar scroll para cambiar la apariencia del header
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 20;
@@ -29,7 +27,6 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  // Cerrar el menú de producto al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -100,17 +97,6 @@ export default function Header() {
                       ¡Danos la información de tu paquete y nosotros te lo
                       enviamos!
                     </p>
-
-                    {/* <div className="space-y-2">
-                      <Link
-                        href="/web/pricing"
-                        className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#FFB800] rounded-md transition-colors"
-                        onClick={() => setProductoOpen(false)}
-                      >
-                        Precios
-                        <ChevronDown className="h-4 w-4 transform -rotate-90" />
-                      </Link>
-                    </div> */}
                   </div>
                 </div>
               )}
@@ -122,6 +108,13 @@ export default function Header() {
             >
               Sucursales
             </Link>
+
+            <Link
+              href="/web/contact"
+              className="text-white hover:text-[#1D3F60] font-medium text-sm transition-colors duration-200 xl:text-[22px]"
+            >
+              Contacto
+            </Link>
           </nav>
 
           {/* Botones de acción */}
@@ -131,15 +124,15 @@ export default function Header() {
               asChild
               className="font-medium text-white hover:text-[#1D3F60] hover:bg-transparent xl:text-[18px]"
             >
-              {/* <Link href ="/auth/login" /> */}
-              <Link href="/">{t("header.signIn")}</Link>
+              {/* Link to login */}
+              <Link href="/auth/login">{t("header.signIn")}</Link>
             </Button>
             <Button
               className="bg-[#1D3F60] hover:bg-[#44697a] text-white font-bold transition-all duration-200 shadow-sm hover:shadow xl:text-[18px]"
               asChild
             >
-              {/* <Link href ="/auth/register" /> */}
-              <Link href="/">{t("header.signUp")}</Link>
+              {/* Link to register */}
+              <Link href="/auth/register">{t("header.signUp")}</Link>
             </Button>
           </div>
 

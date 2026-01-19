@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,16 +7,52 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { QrCode, Camera, CheckCircle, AlertTriangle, MapPin, Phone, Package } from "lucide-react"
-import { currentPackage, deliveryFailureReasons, priorityColors, DeliveryPackage } from "@/mocks/carrier"
+import { listShipments } from "@/lib/api/shipment"
+import { useTranslations } from 'next-intl'
+import { useEffect, useState } from "react"
+
+type DeliveryPackage = {
+  id: string;
+  recipient?: string;
+  phone?: string;
+  address?: string;
+  weight?: string;
+  priority?: string;
+}
+
+const deliveryFailureReasons = [
+  { value: 'recipient_not_available', label: 'Destinatario ausente' },
+  { value: 'wrong_address', label: 'Dirección incorrecta' },
+  { value: 'damaged', label: 'Paquete dañado' },
+]
+
+const priorityColors: Record<string, string> = { Alta: 'bg-red-500', Media: 'bg-yellow-500', Baja: 'bg-blue-500', default: 'bg-gray-400' }
 
 export function CarrierDeliveryContent() {
+  const t = useTranslations('logistics');
   const [selectedPackage, setSelectedPackage] = useState<DeliveryPackage | null>(null)
   const [deliveryStatus, setDeliveryStatus] = useState("")
   const [comments, setComments] = useState("")
   const [recipientName, setRecipientName] = useState("")
 
-  const handleScanPackage = () => {
-    setSelectedPackage(currentPackage)
+  const handleScanPackage = async () => {
+    // simulate scanning by fetching an assigned shipment/package
+    try {
+    const { items: itemsList } = await listShipments({ assignedTo: 'me', limit: 1 }).catch(() => ({ items: [] }))
+    const item = itemsList?.[0] ?? null
+      if (item) {
+        setSelectedPackage({
+          id: item.id ?? item.trackingCode,
+          recipient: item.recipient,
+          phone: item.phone,
+          address: item.address || item.destination,
+          weight: item.weight,
+          priority: item.priority,
+        })
+      }
+    } catch {
+      setSelectedPackage(null)
+    }
   }
 
   const handleDeliverySuccess = () => {
@@ -49,15 +83,15 @@ export function CarrierDeliveryContent() {
     <div className="space-y-8 p-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Entrega de Paquete</h1>
-        <p className="text-xl text-gray-600">Confirma la entrega con seguimiento detallado</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('labels.confirmDeliveryTitle')}</h1>
+        <p className="text-xl text-gray-600">{t('labels.confirmDeliveryDesc')}</p>
       </div>
 
       {/* Package Scanner */}
       {!selectedPackage && (
         <Card className="border-0 shadow-lg max-w-2xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <QrCode className="w-6 h-6 text-logistics-primary" />
               Escanear Paquete a Entregar
             </CardTitle>
@@ -139,8 +173,8 @@ export function CarrierDeliveryContent() {
 
           {/* Delivery Form */}
           <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-900">Confirmar Entrega</CardTitle>
+              <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-900">{t('labels.confirmDeliveryTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -178,7 +212,7 @@ export function CarrierDeliveryContent() {
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white h-14"
                 >
                   <CheckCircle className="w-5 h-5 mr-2" />
-                  Marcar como Entregado
+                  {t('labels.markAsDelivered')}
                 </Button>
                 <Button
                   onClick={() => setDeliveryStatus("failed")}
@@ -186,7 +220,7 @@ export function CarrierDeliveryContent() {
                   className="px-8 h-14 border-red-300 text-red-600 hover:bg-red-50"
                 >
                   <AlertTriangle className="w-5 h-5 mr-2" />
-                  No Entregado
+                  {t('labels.notDelivered')}
                 </Button>
               </div>
             </CardContent>

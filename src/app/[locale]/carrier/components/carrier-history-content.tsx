@@ -1,30 +1,52 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { PackageStatus } from '@/contracts/package'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CheckCircle, AlertTriangle, Clock, Package, MapPin, Phone, FileText } from "lucide-react"
-import { Delivery, deliveryHistory } from "@/mocks/carrier"
+import { listShipments } from "@/lib/api/shipment"
+import { getPackageStatusColor } from '@/lib/status'
+
+type Delivery = {
+  id: string;
+  status?: PackageStatus;
+  priority?: string;
+  recipient?: string;
+  address?: string;
+  time?: string;
+  phone?: string;
+  comments?: string;
+  receivedBy?: string;
+  failureReason?: string;
+}
 
 
 
 export function CarrierHistoryContent() {
-  const [statusFilter, setStatusFilter] = useState("all")
+  const tStatus = useStatusTranslation();
+  const [statusFilter, setStatusFilter] = useState<'all' | PackageStatus | string>("all")
+  const [deliveryHistory, setDeliveryHistory] = useState<Delivery[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const { items } = await listShipments({ limit: 200, page: 1 }).catch(() => ({ items: [] }));
+        if (mounted) setDeliveryHistory(items)
+      } catch (e) {
+        if (mounted) setDeliveryHistory([]);
+      }
+    })();
+    return () => { mounted = false }
+  }, [])
 
   
 
-  const getStatusColor = (status: Delivery["status"]): string => {
-    switch (status) {
-      case "Entregado":
-        return "bg-green-500"
-      case "Fallido":
-        return "bg-red-500"
-      default:
-        return "bg-gray-500"
-    }
-  }
+  const getStatusColor = (status?: Delivery["status"]): string => getPackageStatusColor(String(status))
 
   const getPriorityColor = (priority: Delivery["priority"]): string => {
     switch (priority) {
@@ -41,23 +63,23 @@ export function CarrierHistoryContent() {
 
   const getStatusIcon = (status: Delivery["status"]) => {
     switch (status) {
-      case "Entregado":
+      case PackageStatus.DELIVERED:
         return <CheckCircle className="w-5 h-5 text-green-500" />
-      case "Fallido":
+      case PackageStatus.EXCEPTION:
         return <AlertTriangle className="w-5 h-5 text-red-500" />
       default:
         return <Package className="w-5 h-5 text-gray-500" />
     }
   }
 
-  const filteredHistory = deliveryHistory.filter((delivery) => {
-    if (statusFilter !== "all" && delivery.status.toLowerCase() !== statusFilter) return false
+  const filteredHistory = deliveryHistory.filter((delivery: Delivery) => {
+    if (statusFilter !== "all" && (delivery.status ?? '') !== statusFilter) return false
     return true
   })
 
-  const successfulDeliveries = deliveryHistory.filter((d) => d.status === "Entregado").length
-  const failedDeliveries = deliveryHistory.filter((d) => d.status === "Fallido").length
-  const successRate = Math.round((successfulDeliveries / deliveryHistory.length) * 100)
+  const successfulDeliveries = deliveryHistory.filter((d: Delivery) => d.status === PackageStatus.DELIVERED).length
+  const failedDeliveries = deliveryHistory.filter((d: Delivery) => d.status === PackageStatus.EXCEPTION).length
+  const successRate = deliveryHistory.length > 0 ? Math.round((successfulDeliveries / deliveryHistory.length) * 100) : 0
 
   return (
     <div className="space-y-8 p-6">
@@ -111,8 +133,8 @@ export function CarrierHistoryContent() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="entregado">Entregado</SelectItem>
-                <SelectItem value="fallido">Fallido</SelectItem>
+                <SelectItem value={PackageStatus.DELIVERED}>{tStatus.status(PackageStatus.DELIVERED)}</SelectItem>
+                <SelectItem value={PackageStatus.EXCEPTION}>{tStatus.status(PackageStatus.EXCEPTION)}</SelectItem>
               </SelectContent>
             </Select>
             <Button className="bg-logistics-primary hover:bg-logistics-primary/90 text-white">
@@ -133,11 +155,11 @@ export function CarrierHistoryContent() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredHistory.map((delivery) => (
+            {filteredHistory.map((delivery: Delivery) => (
               <div
                 key={delivery.id}
                 className={`p-4 rounded-lg border-l-4 ${
-                  delivery.status === "Entregado" ? "bg-green-50 border-l-green-500" : "bg-red-50 border-l-red-500"
+                  delivery.status === PackageStatus.DELIVERED ? "bg-green-50 border-l-green-500" : "bg-red-50 border-l-red-500"
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -154,7 +176,7 @@ export function CarrierHistoryContent() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge className={`${getStatusColor(delivery.status)} text-white mb-1`}>{delivery.status}</Badge>
+                    <Badge className={`${getStatusColor(delivery.status)} text-white mb-1`}>{delivery.status ? tStatus.status(delivery.status) : ''}</Badge>
                     <p className="text-sm text-gray-500">{delivery.time}</p>
                   </div>
                 </div>

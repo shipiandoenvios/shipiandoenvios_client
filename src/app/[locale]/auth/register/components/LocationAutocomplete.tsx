@@ -31,7 +31,7 @@ export function LocationAutocomplete({ value = "", onChange, error }: LocationAu
     setInputValue(value);
   }, [value]);
 
-  const { isLoaded } = useLoadScript({
+  const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
     libraries,
   });
@@ -39,6 +39,13 @@ export function LocationAutocomplete({ value = "", onChange, error }: LocationAu
   const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
     setAutocomplete(autocomplete);
   };
+
+  useEffect(() => {
+    if (loadError) {
+      // Ayuda rápida para debugging: mostar el detalle del error en consola
+      console.error("Google Maps loadError:", loadError);
+    }
+  }, [loadError]);
 
   const onPlaceChanged = () => {
     if (autocomplete) {
@@ -62,6 +69,8 @@ export function LocationAutocomplete({ value = "", onChange, error }: LocationAu
   };
 
   if (!isLoaded) {
+    // Si hay un error al cargar el script de Google Maps, dejamos que el usuario
+    // ingrese la ubicación manualmente y mostramos información útil.
     return (
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -70,9 +79,19 @@ export function LocationAutocomplete({ value = "", onChange, error }: LocationAu
         <input
           type="text"
           className="pl-10 block w-full px-4 py-2.5 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-[#7dd3c8] focus:border-transparent var(--font-nunito) transition-all duration-200"
-          placeholder="Cargando..."
-          disabled
+          placeholder={loadError ? "No se pudo cargar Google Maps" : "Cargando..."}
+          disabled={!loadError}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            onChange(e.target.value);
+          }}
         />
+        {loadError && (
+          <p className="text-sm text-yellow-700 mt-1">
+            No se pudo cargar Google Maps. Revisa que tengas una clave en <code>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code>, que las APIs "Maps JavaScript API" y "Places API" estén habilitadas, que la facturación esté activa y que las restricciones de referrer permitan esta URL (ej. <code>http://localhost:3000/*</code> durante desarrollo). Puedes ingresar la ubicación manualmente.
+          </p>
+        )}
       </div>
     );
   }

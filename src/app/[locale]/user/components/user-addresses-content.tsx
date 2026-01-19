@@ -3,9 +3,27 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MapPin, Plus, Trash2, Edit } from "lucide-react"
-import { addresses } from "@/mocks/user"
+import { useEffect, useState } from "react"
+import { fetchJson, extractList } from "@/lib/api"
+
+type Address = { id: string; name: string; street: string; city: string; state?: string; zipCode?: string; isDefault?: boolean }
 
 export function UserAddressesContent() {
+  const [addresses, setAddresses] = useState<Address[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetchJson('/api/user/addresses').catch(() => null);
+        const itemsList = extractList(res);
+        if (mounted) setAddresses(itemsList.items);
+      } catch {
+        if (mounted) setAddresses([]);
+      }
+    })();
+    return () => { mounted = false };
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">

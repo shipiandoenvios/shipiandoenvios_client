@@ -209,5 +209,64 @@
         }
       }
     }
+  },
+  "logistics": {
+    "status": {
+      "CREATED": "Creado",
+      "AWAITING_CHECKIN": "En espera de registro",
+      "AT_ORIGIN": "En origen",
+      "IN_WAREHOUSE": "En almacén",
+      "IN_TRANSIT": "En tránsito",
+      "OUT_FOR_DELIVERY": "En reparto",
+      "DELIVERED": "Entregado",
+      "RETURNED": "Devuelto",
+      "EXCEPTION": "Excepción"
+    },
+    "trackingEvent": {
+      "CREATED": "Creado",
+      "LABEL_PRINTED": "Etiqueta impresa",
+      "PICKED_UP": "Recogido",
+      "IN_TRANSIT": "En tránsito",
+      "HUB_TRANSFER": "Transferencia de centro",
+      "OUT_FOR_DELIVERY": "En reparto",
+      "DELIVERED": "Entregado",
+      "DELAYED": "Retrasado",
+      "EXCEPTION": "Excepción",
+      "RETURN_INITIATED": "Devolución iniciada",
+      "RETURNED": "Devuelto"
+    }
+    ,
+    "driverStatus": {
+      "ON_ROUTE": "En ruta",
+      "ACTIVE": "Activo",
+      "OUT_OF_SERVICE": "Fuera de servicio",
+      "REST": "Descanso",
+      "BUSY": "Ocupado",
+      "UNKNOWN": "Desconocido"
+    },
+    "clientStatus": {
+      "VIP": "VIP",
+      "ACTIVE": "Activo",
+      "NEW": "Nuevo",
+      "INACTIVE": "Inactivo"
+    }
+    ,
+    "labels": {
+      "cancelPackage": "Cancelar paquete",
+      "canceling": "Cancelando...",
+      "deliveredMetric": "Entregados",
+      "deliveredToday": "Entregados Hoy",
+      "confirmPickupTitle": "Confirmar Retiro"
+      ,
+      "packageCanceled": "Paquete cancelado correctamente",
+      "errorCancelPackage": "Error al cancelar el paquete"
+      ,
+      "delivered": "Entregado"
+      ,
+      "markAsDelivered": "Marcar como Entregado",
+      "notDelivered": "No Entregado",
+      "confirmDeliveryTitle": "Confirmar Entrega",
+      "confirmDeliveryDesc": "Confirma la entrega con seguimiento detallado"
+    }
   }
 } 

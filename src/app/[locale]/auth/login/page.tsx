@@ -15,12 +15,13 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      if (user.role === "USER") {
+      const roles = user.roles || (user.role ? [user.role] : []);
+      if (roles.includes("USER") || roles.includes("CLIENT")) {
         router.push(`/${locale}/app/client/dashboard`);
-      } else if (user.role === "SUPER_ADMIN") {
+      } else if (roles.includes("ADMIN") || roles.includes("SUPER_ADMIN")) {
         router.push(`/${locale}/app/dashboard`);
       } else {
-        // ADMIN, EMPRESA, ACCOUNTANT, etc.
+        // fallback: ADMIN, EMPRESA, ACCOUNTANT, etc.
         router.push(`/${locale}/app/accountant/dashboard`);
       }
     }

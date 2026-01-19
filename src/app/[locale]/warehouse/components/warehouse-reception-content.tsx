@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { warehouseReceptionMockPackage } from "@/mocks/warehouse"
 import { QrCode, Camera, Package, CheckCircle } from "lucide-react"
+import { listPackages } from '@/lib/api/package'
+import { useEffect } from "react"
 
 interface PackageData {
   tracking: string;
@@ -20,8 +21,34 @@ export function WarehouseReceptionContent() {
   const [trackingCode, setTrackingCode] = useState("")
   const [packageData, setPackageData] = useState<PackageData | null>(null)
 
-  const handleScan = () => {
-    setPackageData(warehouseReceptionMockPackage)
+  const handleScan = async () => {
+    // if trackingCode present (manual), search by tracking, otherwise simulate by fetching a recent package
+    try {
+        if (trackingCode) {
+      // Use typed wrapper for package search
+      const { items: itemsList } = await listPackages({ search: trackingCode, limit: 1 }).catch(() => ({ items: [] }));
+        const item = itemsList?.[0] ?? null;
+        setPackageData(item ? {
+          tracking: item.trackingCode ?? item.id,
+          sender: item.sender ?? item.from,
+          recipient: item.recipient ?? item.to,
+          destination: item.destination ?? item.zone,
+          weight: item.weight ?? ''
+        } : null);
+      } else {
+        const { items: itemsList } = await listPackages({ limit: 1 }).catch(() => ({ items: [] }))
+        const item = itemsList?.[0] ?? null;
+        setPackageData(item ? {
+          tracking: item.trackingCode ?? item.id,
+          sender: item.sender ?? item.from,
+          recipient: item.recipient ?? item.to,
+          destination: item.destination ?? item.zone,
+          weight: item.weight ?? ''
+        } : null);
+      }
+    } catch (e) {
+      setPackageData(null);
+    }
   }
 
   const handleConfirmReception = () => {
