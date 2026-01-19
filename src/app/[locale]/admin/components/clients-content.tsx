@@ -6,11 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Users, Plus, Search, Mail, Phone, Package, Eye, Edit } from "lucide-react"
 import { useEffect, useCallback, useState } from "react"
+import { ClientStatus } from '@/contracts/user'
+import { getClientStatusColor } from '@/lib/status'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { Skeleton } from "@/components/ui/skeleton"
 import { usePagination } from "@/hooks/use-pagination"
 import { Pagination } from "@/components/ui/pagination"
 
 import { getApiUrl } from "@/packages/config"
-import { fetchJson } from "@/lib/api"
+import { appendPaginationToUrl } from '@/lib/pagination'
+import { listClients } from '@/lib/api/client'
 import { useError } from "@/hooks/use-error"
 import { ErrorMessage } from "@/components/ui/error-message"
 
@@ -27,15 +32,11 @@ export function ClientsContent() {
     setLoading(true);
     clearError();
     try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-        search: searchTerm,
-      });
-      const data = await fetchJson(getApiUrl(`/api/client?${params}`));
-      setClients(data.items || []);
-      setMeta({ total: data.pagination?.total || 0 });
-      setClientStats(data.stats || { totalClients: 0, vipClients: 0, newClients: 0, activeClients: 0 });
+      const url = appendPaginationToUrl(getApiUrl(`/api/client`), { page, limit, search: searchTerm });
+      const { items, pagination, stats } = await listClients({ page, limit, search: searchTerm });
+      setClients(items);
+      setMeta({ total: pagination?.total || 0 });
+      setClientStats(stats || { totalClients: 0, vipClients: 0, newClients: 0, activeClients: 0 });
     } catch (err: any) {
       showError(err?.message || "Error al obtener clientes");
       setClients([]);
@@ -49,20 +50,9 @@ export function ClientsContent() {
     fetchClients();
   }, [fetchClients]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "VIP":
-        return "bg-purple-500";
-      case "Activo":
-        return "bg-green-500";
-      case "Nuevo":
-        return "bg-blue-500";
-      case "Inactivo":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
+  const tStatus = useStatusTranslation();
+
+  const getStatusColor = (status: ClientStatus | string) => getClientStatusColor(status?.toString?.() ?? "");
 
   return (
     <div className="space-y-6">
@@ -138,7 +128,7 @@ export function ClientsContent() {
                             </div>
                           </td>
                           <td className="py-4 px-4">
-                            <Badge className={`${getStatusColor(client.status)} text-white`}>{client.status}</Badge>
+                            <Badge className={`${getStatusColor(client.status)} text-white`}>{tStatus.client(client.status ?? "")}</Badge>
                           </td>
                           <td className="py-4 px-4 text-gray-700">{client.lastOrder}</td>
                           <td className="py-4 px-4">
@@ -156,6 +146,7 @@ export function ClientsContent() {
                     </tbody>
                   </table>
                 )}
+      </Card>
       {/* Clients Table */}
       <Card className="border-0 shadow-md">
         <CardHeader>
@@ -212,7 +203,7 @@ export function ClientsContent() {
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <Badge className={`${getStatusColor(client.status)} text-white`}>{client.status}</Badge>
+                        <Badge className={`${getStatusColor(client.status)} text-white`}>{tStatus.client(client.status ?? "")}</Badge>
                       </td>
                       <td className="py-4 px-4 text-gray-700">{client.lastOrder}</td>
                       <td className="py-4 px-4">

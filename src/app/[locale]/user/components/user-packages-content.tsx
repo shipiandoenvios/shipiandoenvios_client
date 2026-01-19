@@ -5,32 +5,23 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Package, Search, CheckCircle, Truck } from "lucide-react"
-import { ActiveSection } from "@/app/[locale]/user/page"
-// Local display mapping (replace mocks) — colors/icons by PackageStatus
-const packageStatusColors: Record<string, string> = {
-  CREATED: 'bg-gray-400',
-  AWAITING_CHECKIN: 'bg-indigo-500',
-  AT_ORIGIN: 'bg-indigo-400',
-  IN_WAREHOUSE: 'bg-yellow-500',
-  IN_TRANSIT: 'bg-blue-600',
-  OUT_FOR_DELIVERY: 'bg-orange-500',
-  DELIVERED: 'bg-green-500',
-  RETURNED: 'bg-gray-600',
-  EXCEPTION: 'bg-red-500',
-  default: 'bg-gray-400',
-};
-import { PackageData, TrackingData, PackageStatus, TrackingEventType } from "@/contracts/package"
+import { ActiveSection } from "@/app/[locale]/user/types"
+import { getPackageStatusColor } from '@/lib/status'
+import { PackageData, PackageStatus, TrackingEventType } from "@/contracts/package"
+import { TrackingData } from "@/app/[locale]/user/types"
 import { useStatusTranslation } from "@/packages/internationalization/useStatusTranslation"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, Dispatch, SetStateAction } from "react"
 import { useError } from "@/hooks/use-error"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { usePagination } from "@/hooks/use-pagination"
 import { Pagination } from "@/components/ui/pagination"
 import { getApiUrl } from "@/packages/config"
+import { appendPaginationToUrl } from '@/lib/pagination'
+import { listPackages } from '@/lib/api/package'
 
 interface UserPackagesContentProps {
-  setSelectedPackage: (pkg: TrackingData) => void
+  setSelectedPackage: Dispatch<SetStateAction<TrackingData | null>>
   setActiveSection: (section: ActiveSection) => void
 }
 
@@ -46,23 +37,9 @@ export function UserPackagesContent({ setSelectedPackage, setActiveSection }: Us
     setLoading(true);
     clearError();
     try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-        search: searchTerm,
-      });
-      const res = await fetch(getApiUrl(`/api/package?${params}`), {
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        showError(errorData.message || "Error al obtener paquetes");
-        setPackages([]);
-        return;
-      }
-      const data = await res.json();
-      setPackages(data.items || []);
-      setMeta({ total: data.pagination?.total || 0 });
+      const { items, pagination } = await listPackages({ page, limit, search: searchTerm });
+      setPackages(items);
+      setMeta({ total: pagination?.total || 0 });
     } catch (err) {
       showError("Error de conexión. Intenta de nuevo más tarde.");
       setPackages([]);
@@ -76,13 +53,19 @@ export function UserPackagesContent({ setSelectedPackage, setActiveSection }: Us
   }, [fetchPackages]);
 
   const convertToTrackingData = (pkg: PackageData): TrackingData => ({
+    id: pkg.trackingCode ?? pkg.id,
     code: pkg.trackingCode ?? pkg.id,
-    shipmentId: pkg.shipmentId ?? "",
-    type: TrackingEventType.CREATED,
-    description: pkg.description,
-    createdAt: pkg.date,
-    location: pkg.zone,
-    status: pkg.status,
+    shipmentId: pkg.shipmentId,
+    description: pkg.description ?? "",
+    sender: undefined,
+    status: pkg.status as PackageStatus,
+    date: pkg.lastStatusAt ?? pkg.lastScanAt ?? new Date().toISOString(),
+    createdAt: pkg.lastStatusAt ?? pkg.lastScanAt ?? new Date().toISOString(),
+    progress: 0,
+    estimatedDate: undefined,
+    currentLocation: (pkg as any).zone ?? undefined,
+    location: (pkg as any).zone ?? undefined,
+    timeline: [],
   });
 
   const getStatusIcon = (status: PackageStatus) => {
@@ -98,7 +81,7 @@ export function UserPackagesContent({ setSelectedPackage, setActiveSection }: Us
     }
   };
 
-  const getStatusColor = (status: PackageStatus) => packageStatusColors[status] || packageStatusColors["default"];
+  const getStatusColor = (status: PackageStatus) => getPackageStatusColor(status)
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -165,7 +148,21 @@ export function UserPackagesContent({ setSelectedPackage, setActiveSection }: Us
           packages.map((pkg) => (
             <Card key={pkg.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
-                {/* ...existing code... */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Package className="w-10 h-10 text-gray-500" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{pkg.trackingCode ?? pkg.id}</h3>
+                      <p className="text-sm text-gray-600">{pkg.description}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge className={`${getStatusColor(pkg.status as PackageStatus)} text-white`}>{tStatus.status(pkg.status as PackageStatus)}</Badge>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mb-4">Última actualización: {pkg.date}</p>
+                <div className="flex gap-3">
+                  <Button onClick={() => { setSelectedPackage(convertToTrackingData(pkg)); setActiveSection("tracking"); }} className="flex-1 bg-logistics-primary hover:bg-logistics-primary/90 text-white">
                     <Search className="w-4 h-4 mr-2" />
                     Ver Seguimiento
                   </Button>

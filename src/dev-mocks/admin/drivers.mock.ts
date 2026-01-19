@@ -5,6 +5,8 @@ export const driverStats = {
     outOfService: 2,
 }
 
+import { DriverStatus } from '@/contracts/user'
+
 export const drivers = [
     {
         id: "DRV-001",
@@ -12,7 +14,7 @@ export const drivers = [
         zone: "Microcentro",
         vehicle: "Furgoneta - ABC-123",
         assignedShipments: 12,
-        status: "En ruta",
+        status: DriverStatus.ON_ROUTE,
         rating: 4.8,
         deliveries: 156,
     },
@@ -22,7 +24,7 @@ export const drivers = [
         zone: "Zona Norte",
         vehicle: "Camión - XYZ-456",
         assignedShipments: 8,
-        status: "Activo",
+        status: DriverStatus.ACTIVE,
         rating: 4.9,
         deliveries: 203,
     },
@@ -32,7 +34,7 @@ export const drivers = [
         zone: "Zona Sur",
         vehicle: "Furgoneta - DEF-789",
         assignedShipments: 0,
-        status: "Fuera de servicio",
+        status: DriverStatus.OUT_OF_SERVICE,
         rating: 4.6,
         deliveries: 89,
     },
@@ -42,7 +44,7 @@ export const drivers = [
         zone: "Zona Oeste",
         vehicle: "Motocicleta - GHI-012",
         assignedShipments: 15,
-        status: "En ruta",
+        status: DriverStatus.ON_ROUTE,
         rating: 4.7,
         deliveries: 134,
     },

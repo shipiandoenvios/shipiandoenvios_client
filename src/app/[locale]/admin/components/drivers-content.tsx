@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Truck, Plus, MapPin, Package, Clock, Star } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { DriverStatus } from '@/contracts/user'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { getDriverStatusColor } from '@/lib/status'
+import { fetchJson, extractList } from "@/lib/api"
 
 const defaultDriverStats = { totalDrivers: 0, onRoute: 0, available: 0, outOfService: 0 }
 
@@ -21,7 +24,8 @@ export function DriversContent() {
           fetchJson('/api/driver/stats').catch(() => null),
         ])
         if (!mounted) return
-        setDrivers(Array.isArray(dRes) ? dRes : dRes?.items ?? dRes?.data ?? [])
+        const { items: driversList } = extractList(dRes)
+        setDrivers(driversList)
         if (sRes) setDriverStats(sRes)
       } catch {
         if (mounted) {
@@ -33,20 +37,9 @@ export function DriversContent() {
     return () => { mounted = false }
   }, [])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "En ruta":
-        return "bg-blue-500"
-      case "Activo":
-        return "bg-green-500"
-      case "Fuera de servicio":
-        return "bg-red-500"
-      case "Descanso":
-        return "bg-yellow-500"
-      default:
-        return "bg-gray-500"
-    }
-  }
+  const tStatus = useStatusTranslation();
+
+  const getStatusColor = (status: DriverStatus | string) => getDriverStatusColor(status?.toString?.() ?? "")
 
   return (
     <div className="space-y-6">
@@ -121,7 +114,7 @@ export function DriversContent() {
                     <p className="text-sm text-gray-600">{driver.id}</p>
                   </div>
                 </div>
-                <Badge className={`${getStatusColor(driver.status)} text-white`}>{driver.status}</Badge>
+                <Badge className={`${getStatusColor(driver.status)} text-white`}>{tStatus.driver(driver.status ?? "")}</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">

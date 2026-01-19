@@ -1,9 +1,11 @@
+import { DriverStatus } from '@/contracts/user'
+
 export interface WarehouseAuthorizedUser {
     id: number;
     name: string;
     role: string;
     shift: string;
-    status: "Activo" | "Inactivo";
+    status: DriverStatus | string;
 }
 
 export interface WarehouseZone {

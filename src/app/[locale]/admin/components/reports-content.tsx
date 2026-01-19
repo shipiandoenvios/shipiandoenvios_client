@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FileText, Download, Calendar } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { fetchJson, extractList } from "@/lib/api"
 
 const defaultQuickStats: any[] = []
 const defaultReportTypes: any[] = []
@@ -24,9 +24,9 @@ export function ReportsContent() {
           fetchJson('/api/admin/reports/recent?limit=10').catch(() => []),
         ])
         if (!mounted) return
-        setQuickStats(Array.isArray(qs) ? qs : qs?.items ?? qs?.data ?? [])
-        setReportTypes(Array.isArray(rt) ? rt : rt?.items ?? rt?.data ?? [])
-        setRecentReports(Array.isArray(rr) ? rr : rr?.items ?? rr?.data ?? [])
+        setQuickStats(extractList(qs).items)
+        setReportTypes(extractList(rt).items)
+        setRecentReports(extractList(rr).items)
       } catch {
         if (mounted) {
           setQuickStats([])

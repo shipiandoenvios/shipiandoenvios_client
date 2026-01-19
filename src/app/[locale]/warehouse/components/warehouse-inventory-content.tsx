@@ -3,17 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useEffect, useCallback, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { fetchJson, extractList } from "@/lib/api"
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { PackageStatus } from '@/contracts/package'
 import { useError } from "@/hooks/use-error"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { usePagination } from "@/hooks/use-pagination"
 import { Pagination } from "@/components/ui/pagination"
 import { getApiUrl } from "@/packages/config"
+import { appendPaginationToUrl } from '@/lib/pagination'
 import { Package, Search, Truck } from "lucide-react"
 
 import { PackageData } from "@/contracts/package"
 
 export function WarehouseInventoryContent() {
+  const tStatus = useStatusTranslation();
   const [selectedPackages, setSelectedPackages] = useState<PackageData["id"][]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [packages, setPackages] = useState<PackageData[]>([]);
@@ -25,23 +29,11 @@ export function WarehouseInventoryContent() {
     setLoading(true);
     clearError();
     try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-        search: searchTerm,
-      });
-          const res = await fetch(getApiUrl(`/api/inventory?${params}`), {
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        showError(errorData.message || "Error al obtener inventario");
-        setPackages([]);
-        return;
-      }
-      const data = await res.json();
-      setPackages(data.items || []);
-      setMeta({ total: data.pagination?.total || 0 });
+      const url = appendPaginationToUrl(getApiUrl(`/api/inventory`), { page, limit, search: searchTerm });
+          const data = await fetchJson(url);
+          const { items, pagination } = extractList(data);
+          setPackages(items);
+          setMeta({ total: pagination?.total || 0 });
     } catch (err) {
       showError("Error de conexión. Intenta de nuevo más tarde.");
       setPackages([]);
@@ -189,9 +181,9 @@ export function WarehouseInventoryContent() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-medium text-gray-900">{pkg.status}</div>
+                                      <div className="text-sm font-medium text-gray-900">{pkg.status ? tStatus.status(pkg.status) : ''}</div>
                       <div className="text-sm text-gray-600">{pkg.date}</div>
-                      <div className="text-sm text-gray-600">{pkg.destination}</div>
+                      <div className="text-sm text-gray-600">{typeof pkg.destination === 'string' ? pkg.destination : pkg.destination ? `${pkg.destination.street ?? ''} ${pkg.destination.city}, ${pkg.destination.country}` : "-"}</div>
                       <div className="text-sm text-gray-600">{pkg.weight}</div>
                       <div className="text-sm text-gray-600">{pkg.daysInWarehouse} días</div>
                     </div>

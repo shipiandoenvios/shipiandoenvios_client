@@ -4,12 +4,16 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Navigation, Clock, Package, CheckCircle } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { PackageStatus } from '@/contracts/package'
+import { getPackageStatusColor } from '@/lib/status'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { useTranslations } from 'next-intl'
+import { listShipments } from '@/lib/api/shipment'
 
 type RoutePackage = {
   id: string;
   order?: number;
-  status?: string;
+  status?: PackageStatus;
   priority?: string;
   recipient?: string;
   address?: string;
@@ -17,27 +21,20 @@ type RoutePackage = {
 }
 
 // Local color maps (UI-only)
-const routeStatusColors: Record<string, string> = {
-  Entregado: 'bg-green-500',
-  'En camino': 'bg-blue-500',
-  Pendiente: 'bg-orange-500',
-  default: 'bg-gray-400',
-}
 const routePriorityColors: Record<string, string> = {
   Alta: 'bg-red-500',
   Media: 'bg-yellow-500',
   Baja: 'bg-blue-500',
   default: 'bg-gray-400',
 }
+ 
 
 
 
 export function CarrierRouteContent() {
 
 
-  const getStatusColor = (status: RoutePackage["status"]): string => {
-    return routeStatusColors[status ?? "default"] || routeStatusColors["default"];
-  }
+  const getStatusColor = (status: RoutePackage["status"]): string => getPackageStatusColor(status)
 
   const getPriorityColor = (priority: RoutePackage["priority"]): string => {
     return routePriorityColors[priority ?? "default"] || routePriorityColors["default"];
@@ -45,11 +42,11 @@ export function CarrierRouteContent() {
 
   const getStatusIcon = (status: RoutePackage["status"]) => {
     switch (status) {
-      case "Entregado":
+      case PackageStatus.DELIVERED:
         return <CheckCircle className="w-5 h-5 text-green-500" />
-      case "En camino":
+      case PackageStatus.IN_TRANSIT:
         return <Navigation className="w-5 h-5 text-blue-500" />
-      case "Pendiente":
+      case PackageStatus.AWAITING_CHECKIN:
         return <Clock className="w-5 h-5 text-orange-500" />
       default:
         return <Package className="w-5 h-5 text-gray-500" />
@@ -62,8 +59,7 @@ export function CarrierRouteContent() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetchJson('/api/shipment?assignedTo=me&limit=200');
-        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
+        const { items } = await listShipments({ assignedTo: 'me', limit: 200 });
         if (mounted) setRoutePackages(items as RoutePackage[]);
       } catch (e) {
         if (mounted) setRoutePackages([]);
@@ -72,8 +68,10 @@ export function CarrierRouteContent() {
     return () => { mounted = false }
   }, []);
 
-  const completedDeliveries = routePackages.filter((pkg: RoutePackage) => pkg.status === "Entregado").length
+  const completedDeliveries = routePackages.filter((pkg: RoutePackage) => pkg.status === PackageStatus.DELIVERED).length
 
+  const tStatus = useStatusTranslation();
+  const t = useTranslations('logistics');
   return (
     <div className="space-y-8 p-6">
       {/* Header */}
@@ -95,16 +93,16 @@ export function CarrierRouteContent() {
           <CardContent className="p-6">
             <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <p className="text-3xl font-bold text-gray-900 mb-2">{completedDeliveries}</p>
-            <p className="text-sm text-gray-600">Entregados</p>
+            <p className="text-sm text-gray-600">{tStatus.status(PackageStatus.DELIVERED)}</p>
           </CardContent>
         </Card>
         <Card className="text-center border-0 shadow-lg">
           <CardContent className="p-6">
             <Clock className="w-12 h-12 text-orange-600 mx-auto mb-4" />
             <p className="text-3xl font-bold text-gray-900 mb-2">
-              {routePackages.filter((p: RoutePackage) => p.status === "Pendiente").length}
+              {routePackages.filter((p: RoutePackage) => p.status === PackageStatus.AWAITING_CHECKIN).length}
             </p>
-            <p className="text-sm text-gray-600">Pendientes</p>
+            <p className="text-sm text-gray-600">{tStatus.status(PackageStatus.AWAITING_CHECKIN)}</p>
           </CardContent>
         </Card>
         <Card className="text-center border-0 shadow-lg">
@@ -154,9 +152,9 @@ export function CarrierRouteContent() {
               .map((pkg: RoutePackage) => (
                 <div
                   key={pkg.id}
-                  className={`p-4 rounded-lg border-l-4 ${pkg.status === "Entregado"
+                  className={`p-4 rounded-lg border-l-4 ${pkg.status === PackageStatus.DELIVERED
                       ? "bg-green-50 border-l-green-500"
-                      : pkg.status === "Pendiente"
+                      : pkg.status === PackageStatus.AWAITING_CHECKIN
                         ? "bg-orange-50 border-l-orange-500"
                         : "bg-blue-50 border-l-blue-500"
                     }`}
@@ -176,7 +174,7 @@ export function CarrierRouteContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(pkg.status)}
-                      <Badge className={`${getStatusColor(pkg.status)} text-white`}>{pkg.status}</Badge>
+                      <Badge className={`${getStatusColor(pkg.status)} text-white`}>{pkg.status ? tStatus.status(pkg.status) : ''}</Badge>
                     </div>
                   </div>
 
@@ -189,7 +187,7 @@ export function CarrierRouteContent() {
                   </div>
 
                   <div className="flex gap-2">
-                    {pkg.status === "Pendiente" && (
+                    {pkg.status === PackageStatus.AWAITING_CHECKIN && (
                       <>
                         <Button
                           size="sm"
@@ -204,11 +202,11 @@ export function CarrierRouteContent() {
                         </Button>
                       </>
                     )}
-                    {pkg.status === "Entregado" && (
+                    {pkg.status === PackageStatus.DELIVERED && (
                       <Button size="sm" variant="outline" className="w-full" disabled>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Entregado
-                      </Button>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {t('labels.delivered')}
+                        </Button>
                     )}
                   </div>
                 </div>

@@ -2,10 +2,10 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
-import { fetchJson, getCount } from "@/lib/api"
+import { fetchJson, getCount, extractList } from "@/lib/api"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { useError } from "@/hooks/use-error"
-import { ActiveSection } from "@/app/[locale]/user/page"
+import { ActiveSection } from "@/app/[locale]/user/types"
 
 interface UserDashboardContentProps {
   setActiveSection: (section: ActiveSection) => void
@@ -43,13 +43,14 @@ export function UserDashboardContent({ setActiveSection }: UserDashboardContentP
     (async () => {
       try {
         const a = await fetchJson('/api/user/activity?limit=5').catch(() => null);
-        setRecentActivity(a?.items || a || []);
+        const aList = extractList(a);
+        setRecentActivity(aList.items);
       } catch {
         setRecentActivity([]);
       }
     })();
     return () => { mounted = false };
-  }, []);
+  }, [showError]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">

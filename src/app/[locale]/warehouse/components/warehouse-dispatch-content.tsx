@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, CheckCircle, Navigation, Truck } from "lucide-react"
 import { useEffect } from "react"
-import { fetchJson } from "@/lib/api"
+import { fetchJson, extractList } from "@/lib/api"
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { PackageStatus } from '@/contracts/package'
 
 interface PackageData {
   id: string
   description: string
   sender: string
-  status: "Entregado" | "En reparto" | "En tránsito"
+  status: PackageStatus
   date: string
   progress: number
   zone: string
@@ -21,6 +23,7 @@ interface PackageData {
 }
 
 export function WarehouseDispatchContent() {
+  const tStatus = useStatusTranslation();
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPackages, setSelectedPackages] = useState<PackageData["id"][]>([])
   const [selectedCarrier, setSelectedCarrier] = useState("")
@@ -35,10 +38,10 @@ export function WarehouseDispatchContent() {
           fetchJson('/api/inventory?status=ready&limit=200').catch(() => []),
         ])
         if (!mounted) return
-        const cItems = Array.isArray(cRes) ? cRes : cRes?.items ?? cRes?.data ?? []
-        const pItems = Array.isArray(pRes) ? pRes : pRes?.items ?? pRes?.data ?? []
-        setCarriers(cItems)
-        setPackages(pItems)
+        const cList = extractList(cRes)
+        const pList = extractList(pRes)
+        setCarriers(cList.items)
+        setPackages(pList.items)
       } catch {
         if (mounted) {
           setCarriers([])
@@ -49,14 +52,13 @@ export function WarehouseDispatchContent() {
     return () => { mounted = false }
   }, [])
 
-  const getStatusIcon = (status: string) => {
-    // simplified icon mapping
+  const getStatusIcon = (status: PackageData['status']) => {
     const map: Record<string, { icon: any; color: string }> = {
-      "Entregado": { icon: CheckCircle, color: 'text-green-600' },
-      "En reparto": { icon: Navigation, color: 'text-blue-500' },
-      "En tránsito": { icon: Truck, color: 'text-blue-500' },
+      [PackageStatus.DELIVERED]: { icon: CheckCircle, color: 'text-green-600' },
+      [PackageStatus.OUT_FOR_DELIVERY]: { icon: Navigation, color: 'text-blue-500' },
+      [PackageStatus.IN_TRANSIT]: { icon: Truck, color: 'text-blue-500' },
     }
-    const mapping = map[status] || null
+    const mapping = map[status ?? ''] || null
     if (!mapping) return null
     const Icon = mapping.icon
     return <Icon className={`w-5 h-5 ${mapping.color}`} />
@@ -157,7 +159,7 @@ export function WarehouseDispatchContent() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">{pkg.status}</div>
+                <div className="text-sm font-medium text-gray-900">{pkg.status ? tStatus.status(pkg.status) : ''}</div>
                 <div className="text-sm text-gray-600">{pkg.date}</div>
                 <div className="text-sm text-gray-600">{pkg.destination}</div>
               </div>

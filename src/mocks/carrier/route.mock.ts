@@ -1,18 +1,20 @@
+import { PackageStatus } from '@/contracts/package'
+
 export interface RoutePackage {
     id: string;
     recipient: string;
     address: string;
     distance: string;
     priority: "Express" | "Urgente" | "Normal";
-    status: "Entregado" | "En camino" | "Pendiente";
+    status: PackageStatus;
     order: number;
 }
 
 export const routeStatusColors = {
-    "Entregado": "bg-green-500",
-    "En camino": "bg-blue-500",
-    "Pendiente": "bg-orange-500",
-    "default": "bg-gray-500",
+    [PackageStatus.DELIVERED]: "bg-green-500",
+    [PackageStatus.IN_TRANSIT]: "bg-blue-500",
+    [PackageStatus.OUT_FOR_DELIVERY]: "bg-orange-500",
+    default: "bg-gray-500",
 }
 
 export const routePriorityColors = {

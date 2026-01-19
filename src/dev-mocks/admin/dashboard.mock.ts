@@ -1,4 +1,5 @@
 import { Package, Truck, Clock, TrendingUp } from "lucide-react"
+import { PackageStatus } from '@/contracts/package'
 
 export const stats = [
     { title: "Envíos Hoy", value: "127", icon: Package, color: "bg-blue-500" },
@@ -8,10 +9,10 @@ export const stats = [
 ]
 
 export const recentShipments = [
-    { id: "ENV-001", client: "Juan Pérez", status: "En tránsito", destination: "Palermo" },
-    { id: "ENV-002", client: "María García", status: "Entregado", destination: "Belgrano" },
-    { id: "ENV-003", client: "Carlos López", status: "Pendiente", destination: "San Telmo" },
-    { id: "ENV-004", client: "Ana Martín", status: "En tránsito", destination: "Recoleta" },
+    { id: "ENV-001", client: "Juan Pérez", status: PackageStatus.IN_TRANSIT, destination: "Palermo" },
+    { id: "ENV-002", client: "María García", status: PackageStatus.DELIVERED, destination: "Belgrano" },
+    { id: "ENV-003", client: "Carlos López", status: PackageStatus.CREATED, destination: "San Telmo" },
+    { id: "ENV-004", client: "Ana Martín", status: PackageStatus.IN_TRANSIT, destination: "Recoleta" },
 ]
 
 export const alerts = [

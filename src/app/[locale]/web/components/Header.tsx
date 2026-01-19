@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/packages/design-system/components/ui/button";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/packages/internationalization";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/packages/design-system/lib/utils";
@@ -124,15 +124,15 @@ export default function Header() {
               asChild
               className="font-medium text-white hover:text-[#1D3F60] hover:bg-transparent xl:text-[18px]"
             >
-              {/* <Link href ="/auth/login" /> */}
-              <Link href="/">{t("header.signIn")}</Link>
+              {/* Link to login */}
+              <Link href="/auth/login">{t("header.signIn")}</Link>
             </Button>
             <Button
               className="bg-[#1D3F60] hover:bg-[#44697a] text-white font-bold transition-all duration-200 shadow-sm hover:shadow xl:text-[18px]"
               asChild
             >
-              {/* <Link href ="/auth/register" /> */}
-              <Link href="/">{t("header.signUp")}</Link>
+              {/* Link to register */}
+              <Link href="/auth/register">{t("header.signUp")}</Link>
             </Button>
           </div>
 

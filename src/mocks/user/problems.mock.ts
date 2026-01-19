@@ -1,10 +1,12 @@
+import { PackageStatus } from '@/contracts/package'
+
 // Only interfaces/types should remain here. All mock/example data has been removed as data now comes from the backend.
 export const problemPackages = [
   {
     id: "TRK-001229",
     description: "Cable USB-C",
     problem: "Destinatario ausente",
-    status: "Pendiente",
+    status: PackageStatus.EXCEPTION,
     lastAttempt: "15/01 16:30",
   },
 ]

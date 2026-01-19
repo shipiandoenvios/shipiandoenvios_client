@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertTriangle, Phone } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { fetchJson, extractList } from "@/lib/api"
+import { PackageStatus } from '@/contracts/package'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
 
-type ProblemPackage = { id: string; description: string; problem: string; status: string; lastAttempt?: string }
+type ProblemPackage = { id: string; description: string; problem: string; status: PackageStatus; lastAttempt?: string }
 
 const defaultProblemTypes = [
   { value: 'lost', label: 'Paquete perdido' },
@@ -21,6 +23,7 @@ const defaultProblemTypes = [
 const defaultEmergencyContact = { description: 'Soporte 24/7', phone: '+1-800-000-000' }
 
 export function UserProblemsContent() {
+  const tStatus = useStatusTranslation();
   const [trackingCode, setTrackingCode] = useState("")
   const [problemType, setProblemType] = useState("")
   const [description, setDescription] = useState("")
@@ -38,8 +41,8 @@ export function UserProblemsContent() {
           fetchJson('/api/support/contact').catch(() => null),
         ])
         if (!mounted) return
-        const pkgs = Array.isArray(pkgsRes) ? pkgsRes : pkgsRes?.items ?? pkgsRes?.data ?? []
-        setProblemPackages(pkgs)
+        const pkgsList = extractList(pkgsRes)
+        setProblemPackages(pkgsList.items)
         if (typesRes) setProblemTypes(typesRes)
         if (contactRes) setEmergencyContact(contactRes)
       } catch {
@@ -127,7 +130,7 @@ export function UserProblemsContent() {
                       <p className="text-gray-900">{pkg.description}</p>
                       <p className="text-sm text-gray-600">Problema: {pkg.problem}</p>
                     </div>
-                    <Badge className="bg-orange-500 text-white">{pkg.status}</Badge>
+                    <Badge className="bg-orange-500 text-white">{tStatus.status(pkg.status ?? '')}</Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-3">Último intento: {pkg.lastAttempt}</p>
                   <Button size="sm" className="bg-logistics-primary hover:bg-logistics-primary/90">

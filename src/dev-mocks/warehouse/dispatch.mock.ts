@@ -1,10 +1,12 @@
 import { CheckCircle, Truck, Clock } from "lucide-react"
+import { PackageStatus } from '@/contracts/package'
+import { DriverStatus } from '@/contracts/user'
 
 export interface PackageData {
     id: string
     description: string
     sender: string
-    status: "Entregado" | "En reparto" | "En tránsito"
+    status: PackageStatus
     date: string
     progress: number
     zone: string
@@ -18,7 +20,7 @@ export interface Carrier {
     name: string
     zone: string
     capacity: number
-    status: "Disponible" | "En ruta" | "Ocupado"
+    status: DriverStatus | string
 }
 
 export const warehouseDispatchCarriers: Carrier[] = [
@@ -27,14 +29,14 @@ export const warehouseDispatchCarriers: Carrier[] = [
         name: "Juan Pérez",
         zone: "Zona Norte",
         capacity: 10,
-        status: "Disponible",
+        status: DriverStatus.ACTIVE,
     },
     {
         id: "C002",
         name: "María López",
         zone: "Zona Sur",
         capacity: 8,
-        status: "Disponible",
+        status: DriverStatus.ACTIVE,
     },
 ]
 
@@ -43,7 +45,7 @@ export const warehouseDispatchPackages: PackageData[] = [
         id: "TRK-001234",
         description: "Libro JavaScript",
         sender: "Amazon",
-        status: "En reparto",
+        status: PackageStatus.OUT_FOR_DELIVERY,
         date: "Hoy 16:30",
         progress: 90,
         zone: "Zona Norte",
@@ -55,7 +57,7 @@ export const warehouseDispatchPackages: PackageData[] = [
         id: "TRK-001235",
         description: "Auriculares Bluetooth",
         sender: "MercadoLibre",
-        status: "En tránsito",
+        status: PackageStatus.IN_TRANSIT,
         date: "Mañana",
         progress: 60,
         zone: "Zona Norte",
@@ -67,7 +69,7 @@ export const warehouseDispatchPackages: PackageData[] = [
         id: "TRK-001236",
         description: "Medicamentos",
         sender: "Farmacia Online",
-        status: "Entregado",
+        status: PackageStatus.DELIVERED,
         date: "Ayer",
         progress: 100,
         zone: "Zona Sur",
@@ -78,15 +80,15 @@ export const warehouseDispatchPackages: PackageData[] = [
 ]
 
 export const warehouseDispatchStatusIconMap = {
-    Entregado: {
+    [PackageStatus.DELIVERED]: {
         icon: CheckCircle,
         color: "text-green-500",
     },
-    "En reparto": {
+    [PackageStatus.OUT_FOR_DELIVERY]: {
         icon: Truck,
         color: "text-blue-500",
     },
-    "En tránsito": {
+    [PackageStatus.IN_TRANSIT]: {
         icon: Clock,
         color: "text-orange-500",
     },

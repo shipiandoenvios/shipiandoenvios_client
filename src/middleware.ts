@@ -17,122 +17,31 @@ interface RoleRoutes {
   [key: string]: string[];
 }
 
+// Unified role names and route prefixes
 const ROLE_ROUTES: RoleRoutes = {
-  SUPER_ADMIN: ["/app/dashboard"],
-  ADMIN: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  EMPRESA: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ACCOUNTANT: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ENCARGADO: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ADMINISTRATIVO: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  ANALISTA: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  EMPLOYEE: [
-    "/app/accountant/dashboard",
-    "/app/accountant/human-resources",
-    "/app/accountant/human-resources/new",
-    "/app/accountant/clients",
-    "/app/accountant/clients/new",
-    "/app/accountant/rcv",
-    "/app/accountant/rh",
-    "/app/accountant/iusc",
-    "/app/accountant/ppm",
-    "/app/accountant/formularios-mensuales",
-    "/app/accountant/retencion-iva",
-    "/app/accountant/permissions",
-    "/app/accountant/settings",
-  ],
-  USER: [
-    "/app/client/dashboard",
-    "/app/client/rcv",
-    "/app/client/rh",
-    "/app/client/iusc",
-    "/app/client/ppm",
-    "/app/client/retencion-iva",
-    "/app/client/change-password",
-  ],
+  ADMIN: ["/admin"],
+  CLIENT: ["/user"],
+  USER: ["/user"],
+  WAREHOUSE: ["/warehouse"],
+  CARRIER: ["/carrier"],
+  STORE: ["/user"],
+};
+
+// Legacy-to-unified role alias mapping
+const ROLE_ALIAS: { [key: string]: keyof typeof ROLE_ROUTES } = {
+  SUPER_ADMIN: "ADMIN",
+  ACCOUNTANT: "ADMIN",
+  ENCARGADO: "ADMIN",
+  ADMINISTRATIVO: "ADMIN",
+  ANALISTA: "ADMIN",
+  EMPRESA: "CLIENT",
+  EMPLOYEE: "USER",
+  ADMIN: "ADMIN",
+  CLIENT: "CLIENT",
+  USER: "USER",
+  WAREHOUSE: "WAREHOUSE",
+  CARRIER: "CARRIER",
+  STORE: "STORE",
 };
 
 const PUBLIC_ROUTES = [
@@ -159,11 +68,10 @@ const isProtectedRoute = (pathname: string) => {
   }
 
   const protectedPaths = [
-    "/app/",
-    "/dashboard",
-    "/accountant",
-    "/client",
-    "/admin/",
+    "/admin",
+    "/user",
+    "/carrier",
+    "/warehouse",
   ];
   return protectedPaths.some((path) => pathname.includes(path));
 };
@@ -221,7 +129,11 @@ const hasRequiredRole = (request: NextRequest, path: string): boolean => {
     }
 
     const userData = JSON.parse(userCookie.value);
-    const userRole = userData.role;
+    const rolesFromCookie: string[] = Array.isArray(userData.roles)
+      ? userData.roles
+      : userData.role
+      ? [userData.role]
+      : [];
 /*     console.log("Rol del usuario:", userRole);
     console.log("Datos de usuario completos:", userData);
  */
@@ -234,13 +146,12 @@ const hasRequiredRole = (request: NextRequest, path: string): boolean => {
       ); */
     }
 
-    if (userRole === "SUPER_ADMIN") {
-      /* console.log("Usuario es SUPER_ADMIN - acceso total"); */
-      return true;
-    }
-
-    const allowedRoutes =
-      ROLE_ROUTES[userRole as keyof typeof ROLE_ROUTES] || [];
+    const normalizedRoles = rolesFromCookie
+      .map((r: string) => ROLE_ALIAS[r] || (r as keyof typeof ROLE_ROUTES))
+      .filter(Boolean) as (keyof typeof ROLE_ROUTES)[];
+    const allowedRoutes = normalizedRoles.flatMap(
+      (nr) => ROLE_ROUTES[nr] || []
+    );
 /*     console.log("Rutas permitidas para este rol:", allowedRoutes);
  */
     const hasAccess = allowedRoutes.some((route: string) =>
@@ -270,29 +181,28 @@ const getRedirectPathForRole = (request: NextRequest): string => {
     }
 
     const userData = JSON.parse(userCookie.value);
-    const userRole = userData.role;
-
-    switch (userRole) {
-      case "SUPER_ADMIN":
-        return "/app/dashboard";
+    const rolesFromCookie: string[] = Array.isArray(userData.roles)
+      ? userData.roles
+      : userData.role
+      ? [userData.role]
+      : [];
+    const normalizedRoles = rolesFromCookie
+      .map((r: string) => ROLE_ALIAS[r] || r)
+      .filter(Boolean);
+    const priority = ["ADMIN", "WAREHOUSE", "CARRIER", "CLIENT", "USER", "STORE"];
+    const pick = priority.find((p) => normalizedRoles.includes(p));
+    switch (pick) {
       case "ADMIN":
-        return "/app/accountant/dashboard";
-      case "EMPRESA":
-        return "/app/accountant/dashboard";
-      case "ACCOUNTANT":
-        return "/app/accountant/dashboard";
-      case "ENCARGADO":
-        return "/app/accountant/dashboard";
-      case "ADMINISTRATIVO":
-        return "/app/accountant/dashboard";
-      case "ANALISTA":
-        return "/app/accountant/dashboard";
-      case "EMPLOYEE":
-        return "/app/accountant/dashboard";
+        return "/admin";
+      case "WAREHOUSE":
+        return "/warehouse";
+      case "CARRIER":
+        return "/carrier";
+      case "CLIENT":
       case "USER":
-        return "/app/client/dashboard";
+      case "STORE":
+        return "/user";
       default:
-        console.log("Rol desconocido, redirigiendo a login");
         return "/auth/login";
     }
   } catch (error) {
@@ -363,23 +273,9 @@ export async function middleware(request: NextRequest) {
   if (userCookie?.value) {
     try {
       userData = JSON.parse(userCookie.value);
-    } catch (e) { }
-  }
-
-  if (userData && userData.accessAllowed === false) {
-    if (!pathname.includes("/auth/access-denied")) {
-      const locale = pathname.split("/")[1] || "es";
-      const redirectUrl = new URL(`/${locale}/auth/access-denied`, request.url);
-      return NextResponse.redirect(redirectUrl);
+    } catch (e) {
+      console.error("Error parsing user cookie:", e);
     }
-  }
-
-  if (pathname === "/" || isLocaleRoot(pathname)) {
-    const locale =
-      pathname === "/" ? routing.defaultLocale : pathname.split("/")[1];
-
-    const redirectUrl = new URL(`/${locale}/web`, request.url);
-    return NextResponse.redirect(redirectUrl);
   }
 
   const segments = pathname.split("/");

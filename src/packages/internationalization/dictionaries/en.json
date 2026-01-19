@@ -235,5 +235,38 @@
         "RETURNED": "Returned"
       }
     }
+    ,
+    "driverStatus": {
+      "ON_ROUTE": "On Route",
+      "ACTIVE": "Active",
+      "OUT_OF_SERVICE": "Out of Service",
+      "REST": "Rest",
+      "BUSY": "Busy",
+      "UNKNOWN": "Unknown"
+    },
+    "clientStatus": {
+      "VIP": "VIP",
+      "ACTIVE": "Active",
+      "NEW": "New",
+      "INACTIVE": "Inactive"
+    }
+    ,
+    "labels": {
+      "cancelPackage": "Cancel package",
+      "canceling": "Canceling...",
+      "deliveredMetric": "Delivered",
+      "deliveredToday": "Delivered Today",
+      "confirmPickupTitle": "Confirm Pickup"
+      ,
+      "packageCanceled": "Package canceled successfully",
+      "errorCancelPackage": "Error canceling the package"
+      ,
+      "delivered": "Delivered"
+      ,
+      "markAsDelivered": "Mark as Delivered",
+      "notDelivered": "Not Delivered",
+      "confirmDeliveryTitle": "Confirm Delivery",
+      "confirmDeliveryDesc": "Confirm the delivery with detailed tracking"
+    }
   }
 }

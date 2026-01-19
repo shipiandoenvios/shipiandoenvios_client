@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Package, Clock, AlertTriangle, Users } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
 import { Skeleton } from "@/components/ui/skeleton"
-import { fetchJson, getCount } from "@/lib/api"
+import { fetchJson, getCount, extractList } from "@/lib/api"
 import { useError } from "@/hooks/use-error"
 import { ErrorMessage } from "@/components/ui/error-message"
 
@@ -13,6 +14,7 @@ export function DashboardContent() {
   const [shipmentsCount, setShipmentsCount] = useState<number | null>(null)
   const [packagesCount, setPackagesCount] = useState<number | null>(null)
   const [recentShipments, setRecentShipments] = useState<any[]>([])
+  const tStatus = useStatusTranslation()
   const [alerts, setAlerts] = useState<any[]>([])
   const [lastUpdate, setLastUpdate] = useState<string>(new Date().toLocaleString())
 
@@ -34,8 +36,8 @@ export function DashboardContent() {
         // recent shipments
         try {
           const data = await fetchJson("/api/shipment?limit=5&page=1")
-          const items = Array.isArray(data) ? data : data?.items ?? data?.data ?? []
-          setRecentShipments(items)
+          const dataList = extractList(data)
+          setRecentShipments(dataList.items)
         } catch (err: any) {
           // non-fatal for recent list
           console.debug("recent shipments load failed", err)
@@ -44,8 +46,8 @@ export function DashboardContent() {
         // alerts (admin alerts endpoint may or may not exist)
         try {
           const a = await fetchJson("/api/admin/alerts?limit=5&page=1")
-          const items = Array.isArray(a) ? a : a?.items ?? a?.data ?? []
-          setAlerts(items)
+          const aList = extractList(a)
+          setAlerts(aList.items)
         } catch {
           // fallback to empty alerts
           setAlerts([])
@@ -109,59 +111,50 @@ export function DashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              return (
-                <div className="space-y-8 p-6">
-                  {/* Header */}
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Dashboard</h1>
-                    <p className="text-xl text-gray-600">Bienvenido al sistema de gestión SHIPIANDO</p>
+              {recentShipments.length === 0 ? (
+                <div className="text-gray-500">No hay envíos recientes.</div>
+              ) : (
+                recentShipments.map((s, idx) => (
+                  <div key={s.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{s.trackingNumber || s.id}</p>
+                      <p className="text-xs text-gray-600">{tStatus.status(s.status ?? '')}</p>
+                    </div>
+                    <span className="text-sm text-gray-600">{s.updatedAt ? new Date(s.updatedAt).toLocaleString() : ''}</span>
                   </div>
-
-                  {/* Error */}
-                  {error && <ErrorMessage message={error} className="mb-4" />}
-
-                  {/* Stats Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {usersCount === null || shipmentsCount === null || packagesCount === null ? (
-                      [1, 2, 3, 4].map((i) => (
-                        <Card key={i} className="text-center border-0 shadow-lg">
-                          <CardContent className="p-6">
-                            <Skeleton className="h-8 w-8 mx-auto mb-2" />
-                            <Skeleton className="h-4 w-24 mx-auto mb-1" />
-                            <Skeleton className="h-6 w-16 mx-auto" />
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
-                      <>
-                        {/* ...existing code... */}
-                      </>
-                    )}
-                  </div>
-
-                  {/* Recent Shipments */}
-                  <div className="mt-8">
-                    <h2 className="text-2xl font-bold mb-4">Envíos recientes</h2>
-                    {usersCount === null || shipmentsCount === null || packagesCount === null ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(3)].map((_, i) => (
-                          <Card key={i} className="border-0 shadow-md">
-                            <CardContent className="p-4">
-                              <Skeleton className="h-5 w-32 mb-2" />
-                              <Skeleton className="h-4 w-24 mb-1" />
-                              <Skeleton className="h-3 w-20" />
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    ) : recentShipments.length === 0 ? (
-                      <div className="text-gray-500">No hay envíos recientes.</div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* ...existing code... */}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
+                ))
               )}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-gray-900">Alertas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {alerts.length === 0 ? (
+                <div className="text-gray-500">No hay alertas.</div>
+              ) : (
+                alerts.map((a, idx) => (
+                  <div key={a.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-yellow-100">
+                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{a.title || a.message || 'Alerta'}</p>
+                        <p className="text-sm text-gray-600">{a.description}</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-600">{a.time || ''}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

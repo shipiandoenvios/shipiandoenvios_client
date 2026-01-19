@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { PackageCheck, Truck, AlertTriangle, Users } from "lucide-react"
 import { useEffect, useState } from "react"
-import { getCount, fetchJson } from "@/lib/api"
+import { getCount, fetchJson, extractList } from "@/lib/api"
 import { ErrorMessage } from "@/components/ui/error-message"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function WarehouseDashboardContent() {
   const [stats, setStats] = useState<any[]>([]);
@@ -28,10 +29,12 @@ export function WarehouseDashboardContent() {
           { title: 'En tránsito', value: 0, icon: Truck, color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
         ]);
 
-  const act = await fetchJson('/api/tracking-event?limit=5').catch(() => null);
-  if (act && mounted) setRecentActivity(act.items || act || []);
-  const urgent = await fetchJson('/api/inventory?days=2&limit=5').catch(() => null);
-  if (urgent && mounted) setUrgentPackages(urgent.items || urgent || []);
+  const actRes = await fetchJson('/api/tracking-event?limit=5').catch(() => null);
+  const actList = extractList(actRes);
+  if (actList.items && mounted) setRecentActivity(actList.items);
+  const urgentRes = await fetchJson('/api/inventory?days=2&limit=5').catch(() => null);
+  const urgentList = extractList(urgentRes);
+  if (urgentList.items && mounted) setUrgentPackages(urgentList.items);
         if (mounted) setLoading(false);
       } catch (err: any) {
         setError(err.message || 'Error cargando datos del depósito');

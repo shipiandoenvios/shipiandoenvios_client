@@ -235,5 +235,38 @@
       "RETURN_INITIATED": "Devolución iniciada",
       "RETURNED": "Devuelto"
     }
+    ,
+    "driverStatus": {
+      "ON_ROUTE": "En ruta",
+      "ACTIVE": "Activo",
+      "OUT_OF_SERVICE": "Fuera de servicio",
+      "REST": "Descanso",
+      "BUSY": "Ocupado",
+      "UNKNOWN": "Desconocido"
+    },
+    "clientStatus": {
+      "VIP": "VIP",
+      "ACTIVE": "Activo",
+      "NEW": "Nuevo",
+      "INACTIVE": "Inactivo"
+    }
+    ,
+    "labels": {
+      "cancelPackage": "Cancelar paquete",
+      "canceling": "Cancelando...",
+      "deliveredMetric": "Entregados",
+      "deliveredToday": "Entregados Hoy",
+      "confirmPickupTitle": "Confirmar Retiro"
+      ,
+      "packageCanceled": "Paquete cancelado correctamente",
+      "errorCancelPackage": "Error al cancelar el paquete"
+      ,
+      "delivered": "Entregado"
+      ,
+      "markAsDelivered": "Marcar como Entregado",
+      "notDelivered": "No Entregado",
+      "confirmDeliveryTitle": "Confirmar Entrega",
+      "confirmDeliveryDesc": "Confirma la entrega con seguimiento detallado"
+    }
   }
 } 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/store";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { getApiUrl } from "@/packages/config";
+import { authService } from "@/packages/auth/authService";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -13,12 +13,7 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(getApiUrl("/api/auth/logout"), {
-        method: "POST",
-        credentials: "include",
-      });
-
-      const data = await response.json();
+      const data = await authService.logout();
 
       if (!data.success) {
         throw new Error(data.message || "Error al cerrar sesión");

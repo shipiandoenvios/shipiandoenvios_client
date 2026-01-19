@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MapPin, Plus, Trash2, Edit } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { fetchJson, extractList } from "@/lib/api"
 
 type Address = { id: string; name: string; street: string; city: string; state?: string; zipCode?: string; isDefault?: boolean }
 
@@ -16,8 +16,8 @@ export function UserAddressesContent() {
     (async () => {
       try {
         const res = await fetchJson('/api/user/addresses').catch(() => null);
-        const items = Array.isArray(res) ? res : res?.items ?? res?.data ?? [];
-        if (mounted) setAddresses(items);
+        const itemsList = extractList(res);
+        if (mounted) setAddresses(itemsList.items);
       } catch {
         if (mounted) setAddresses([]);
       }

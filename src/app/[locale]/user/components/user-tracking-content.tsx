@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Truck, MapPin, Clock, CheckCircle, Home, Warehouse, AlertTriangle, Package as PackageIcon } from "lucide-react"
-import { ActiveSection } from "@/app/[locale]/user/page"
+import { ActiveSection } from "@/app/[locale]/user/types"
 
 interface TimelineEvent {
   status: string
@@ -11,16 +11,17 @@ interface TimelineEvent {
   current?: boolean
 }
 
-import { TrackingData, PackageStatus, TrackingEventType } from "@/contracts/package"
+import { PackageStatus, TrackingEventType } from "@/contracts/package"
 import { useStatusTranslation } from "@/packages/internationalization/useStatusTranslation"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TrackingData } from '@/app/[locale]/user/types'
 
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { listTrackingEvents } from '@/lib/api/tracking'
 
 interface UserTrackingContentProps {
-  package: TrackingData
-  setActiveSection: (section: ActiveSection) => void
+  package: TrackingData;
+  setActiveSection: (section: ActiveSection) => void;
 }
 
 export function UserTrackingContent({ package: pkg, setActiveSection }: UserTrackingContentProps) {
@@ -48,9 +49,7 @@ export function UserTrackingContent({ package: pkg, setActiveSection }: UserTrac
           setLoading(false);
           return;
         }
-        const res = await fetchJson(`/api/tracking-event?shipmentId=${pkg.shipmentId}`);
-        // Accepts either { items: [...] } or array
-        const items = Array.isArray(res) ? res : res.items || res.data || [];
+        const { items } = await listTrackingEvents({ shipmentId: pkg.shipmentId });
         setEvents(items);
       } catch (e: any) {
         setError(e?.message || "Error al obtener eventos de tracking");
@@ -107,9 +106,9 @@ export function UserTrackingContent({ package: pkg, setActiveSection }: UserTrac
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              {getStatusIcon(pkg.status)}
+              {getStatusIcon(pkg.status as PackageStatus | undefined)}
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{pkg.code}</h2>
+                <h2 className="text-xl font-bold text-gray-900">{pkg.code ?? pkg.id}</h2>
                 <p className="text-gray-600">{pkg.description ?? "Sin descripción"}</p>
               </div>
             </div>

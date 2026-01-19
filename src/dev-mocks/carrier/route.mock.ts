@@ -1,10 +1,12 @@
+import { PackageStatus } from '@/contracts/package'
+
 export interface RoutePackage {
     id: string;
     recipient: string;
     address: string;
     distance: string;
     priority: "Express" | "Urgente" | "Normal";
-    status: "Entregado" | "En camino" | "Pendiente";
+    status: PackageStatus;
     order: number;
 }
 export const routePackages: RoutePackage[] = [
@@ -14,7 +16,7 @@ export const routePackages: RoutePackage[] = [
         address: "Av. Santa Fe 1234, Palermo",
         distance: "2.1 km",
         priority: "Normal",
-        status: "Pendiente",
+        status: PackageStatus.AWAITING_CHECKIN,
         order: 1,
     },
     {
@@ -23,7 +25,7 @@ export const routePackages: RoutePackage[] = [
         address: "Av. Cabildo 5678, Belgrano",
         distance: "3.5 km",
         priority: "Express",
-        status: "Pendiente",
+        status: PackageStatus.AWAITING_CHECKIN,
         order: 2,
     },
     {
@@ -32,16 +34,16 @@ export const routePackages: RoutePackage[] = [
         address: "Av. Corrientes 3456, Microcentro",
         distance: "0 km",
         priority: "Normal",
-        status: "Entregado",
+        status: PackageStatus.DELIVERED,
         order: 0,
     },
 ]
 
 export const routeStatusColors = {
-    "Entregado": "bg-green-500",
-    "En camino": "bg-blue-500",
-    "Pendiente": "bg-orange-500",
-    "default": "bg-gray-500",
+    [PackageStatus.DELIVERED]: "bg-green-500",
+    [PackageStatus.IN_TRANSIT]: "bg-blue-500",
+    [PackageStatus.OUT_FOR_DELIVERY]: "bg-orange-500",
+    default: "bg-gray-500",
 }
 
 export const routePriorityColors = {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { QrCode, Camera, Package, CheckCircle } from "lucide-react"
-import { fetchJson } from "@/lib/api"
+import { listPackages } from '@/lib/api/package'
 import { useEffect } from "react"
 
 interface PackageData {
@@ -24,10 +24,10 @@ export function WarehouseReceptionContent() {
   const handleScan = async () => {
     // if trackingCode present (manual), search by tracking, otherwise simulate by fetching a recent package
     try {
-      if (trackingCode) {
-      // Use `search` param consistent with server-side search/filter
-      const res = await fetchJson(`/api/package?search=${encodeURIComponent(trackingCode)}`).catch(() => null);
-        const item = Array.isArray(res) ? res[0] : res?.items?.[0] ?? res?.data?.[0] ?? res;
+        if (trackingCode) {
+      // Use typed wrapper for package search
+      const { items: itemsList } = await listPackages({ search: trackingCode, limit: 1 }).catch(() => ({ items: [] }));
+        const item = itemsList?.[0] ?? null;
         setPackageData(item ? {
           tracking: item.trackingCode ?? item.id,
           sender: item.sender ?? item.from,
@@ -36,8 +36,8 @@ export function WarehouseReceptionContent() {
           weight: item.weight ?? ''
         } : null);
       } else {
-        const res = await fetchJson('/api/package?limit=1').catch(() => null);
-        const item = Array.isArray(res) ? res[0] : res?.items?.[0] ?? res?.data?.[0] ?? res;
+        const { items: itemsList } = await listPackages({ limit: 1 }).catch(() => ({ items: [] }))
+        const item = itemsList?.[0] ?? null;
         setPackageData(item ? {
           tracking: item.trackingCode ?? item.id,
           sender: item.sender ?? item.from,

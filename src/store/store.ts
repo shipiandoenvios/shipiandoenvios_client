@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { getApiUrl } from "@/packages/config";
+import { fetchJson } from '@/lib/api';
+import { authService } from "@/packages/auth/authService";
+import { onAuthEvent } from '@/lib/auth-events';
 
 // Tipo para la información del usuario
 export type UserInfo = {
@@ -8,6 +11,7 @@ export type UserInfo = {
   email: string;
   name: string | null;
   role: string;
+  roles?: string[];
   active: boolean;
   rut: string | null;
   giroType: string | null;
@@ -73,11 +77,8 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          // Tell server to clear cookie
-          await fetch(getApiUrl("/api/auth/logout"), {
-            method: "POST",
-            credentials: "include",
-          });
+          // Tell server to clear cookie using centralized helper
+          await authService.logout();
         } catch (e) {
           // ignore network errors
         }
@@ -96,6 +97,40 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Register for auth events (refresh failed) to clear the store and force logout
+onAuthEvent((ev) => {
+  if (ev === 'refresh-failed' || ev === 'logout') {
+    (async () => {
+      try {
+        // Centralized logout: clear server cookie and local auth state
+        await useAuthStore.getState().logout();
+      } catch (e) {
+        console.error('Error during logout on auth event', e);
+      }
+
+      try {
+        // Add a global notification to inform the user
+        useGlobalStore.getState().addNotification({
+          id: 'session-expired',
+          message: 'Tu sesión ha expirado. Por favor inicia sesión de nuevo.',
+          type: 'error',
+        });
+      } catch (e) {
+        console.error('Error adding notification on auth event', e);
+      }
+
+      try {
+        // Redirect to login page to force re-authentication
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
+      } catch (e) {
+        console.error('Error redirecting to login', e);
+      }
+    })();
+  }
+});
 
 // Interfaz para el estado global
 export interface GlobalState {
@@ -155,19 +190,7 @@ export const useGlobalStore = create<GlobalState>()(
         set({ isLoadingClients: true, loadError: null });
 
         try {
-          const response = await fetch(getApiUrl("/api/client"), {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
+          const data = await fetchJson(getApiUrl("/api/client"));
           set({ clients: data.clients || [], isLoadingClients: false });
         } catch (error) {
           console.error("Error loading clients:", error);
@@ -180,36 +203,14 @@ export const useGlobalStore = create<GlobalState>()(
 
         try {
           console.log("[GlobalStore] Forzando recarga de clientes...");
-          const response = await fetch(getApiUrl("/api/client"), {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            cache: "no-store",
-          });
-
-          if (!response.ok) {
-            console.error(`[GlobalStore] Error HTTP: ${response.status}`);
-            set({
-              clients: [],
-              isLoadingClients: false,
-              loadError: null,
-            });
-            return;
-          }
-
-          const data = await response.json();
+          const data = await fetchJson(getApiUrl("/api/client"));
           console.log(
             `[GlobalStore] ${
               data.clients?.length || 0
             } clientes cargados (forzado)`
           );
 
-          set({
-            clients: data.clients || [],
-            isLoadingClients: false,
-          });
+          set({ clients: data.clients || [], isLoadingClients: false });
         } catch (error) {
           console.error("[GlobalStore] Error cargando clientes:", error);
           set({

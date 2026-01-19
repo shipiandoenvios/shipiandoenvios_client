@@ -9,27 +9,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Package, Plus, Search, Filter, Eye, Edit, Trash2 } from "lucide-react"
 import { useEffect, useCallback, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { listShipments } from "@/lib/api/shipment"
 import { useError } from "@/hooks/use-error"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { usePagination } from "@/hooks/use-pagination"
 import { Pagination } from "@/components/ui/pagination"
 import { getApiUrl } from "@/packages/config"
+import { appendPaginationToUrl } from '@/lib/pagination'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { PackageStatus } from '@/contracts/package'
+import { getPackageStatusColor } from '@/lib/status'
+// Use enum values for status filters and translation for labels
 const shipmentStatusFilters = [
-  { value: "all", label: "Todos" },
-  { value: "Pendiente", label: "Pendiente" },
-  { value: "En tránsito", label: "En tránsito" },
-  { value: "Entregado", label: "Entregado" },
-  { value: "Cancelado", label: "Cancelado" },
+  { value: 'all', labelKey: 'all' },
+  { value: PackageStatus.AWAITING_CHECKIN, labelKey: PackageStatus.AWAITING_CHECKIN },
+  { value: PackageStatus.IN_TRANSIT, labelKey: PackageStatus.IN_TRANSIT },
+  { value: PackageStatus.DELIVERED, labelKey: PackageStatus.DELIVERED },
+  { value: PackageStatus.CANCELLED, labelKey: PackageStatus.CANCELLED },
 ];
 const statusColors = {
-  Pendiente: "bg-yellow-500",
-  "En tránsito": "bg-blue-500",
-  Entregado: "bg-green-500",
-  Cancelado: "bg-gray-500",
+  [PackageStatus.AWAITING_CHECKIN]: "bg-yellow-500",
+  [PackageStatus.IN_TRANSIT]: "bg-blue-500",
+  [PackageStatus.DELIVERED]: "bg-green-500",
+  [PackageStatus.CANCELLED]: "bg-gray-500",
   default: "bg-gray-500",
 };
 
 export function ShipmentsContent() {
+  const tStatus = useStatusTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [shipments, setShipments] = useState<any[]>([]);
@@ -41,24 +48,11 @@ export function ShipmentsContent() {
     setLoading(true);
     clearError();
     try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-        search: searchTerm,
-        status: statusFilter !== "all" ? statusFilter : "",
-      });
-      const res = await fetch(getApiUrl(`/api/shipment?${params}`), {
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        showError(errorData.message || "Error al obtener envíos");
-        setShipments([]);
-        return;
-      }
-      const data = await res.json();
-      setShipments(data.items || []);
-      setMeta({ total: data.pagination?.total || 0 });
+      const normalizedStatus = statusFilter === 'all' ? undefined : (String(statusFilter).includes('_') ? String(statusFilter).toLowerCase() : statusFilter);
+      const url = appendPaginationToUrl(getApiUrl(`/api/shipment`), { page, limit, search: searchTerm, status: normalizedStatus });
+        const { items, pagination } = await listShipments({ page, limit, search: searchTerm, status: normalizedStatus });
+      setShipments(items);
+      setMeta({ total: pagination?.total || 0 });
     } catch (err) {
       showError("Error de conexión. Intenta de nuevo más tarde.");
       setShipments([]);
@@ -72,7 +66,7 @@ export function ShipmentsContent() {
   }, [fetchShipments]);
 
   const getStatusColor = (status: string) => {
-    return statusColors[status as keyof typeof statusColors] || statusColors.default;
+    return getPackageStatusColor(status ?? "");
   };
 
   return (
@@ -111,8 +105,8 @@ export function ShipmentsContent() {
               </SelectTrigger>
               <SelectContent>
                 {shipmentStatusFilters.map((filter) => (
-                  <SelectItem key={filter.value} value={filter.value}>
-                    {filter.label}
+                  <SelectItem key={String(filter.value)} value={String(filter.value)}>
+                    {filter.value === 'all' ? 'Todos' : tStatus.status(filter.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>

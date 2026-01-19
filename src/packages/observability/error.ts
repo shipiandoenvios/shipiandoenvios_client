@@ -2,20 +2,12 @@ import { log } from "../lib/log";
 
 let captureExceptionRef: ((e: unknown) => void) | null = null;
 
-if (typeof window === "undefined") {
+(async () => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const sentry = require("@sentry/nextjs");
-    captureExceptionRef = sentry.captureException;
-  } catch (e) {
-  }
-} else {
-  import("@sentry/nextjs")
-    .then((mod) => {
-      captureExceptionRef = mod.captureException;
-    })
-    .catch(() => {});
-}
+    const mod = await import("@sentry/nextjs");
+    captureExceptionRef = mod.captureException;
+  } catch {}
+})();
 
 export const parseError = (error: unknown): string => {
   let message = "An error occurred";

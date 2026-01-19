@@ -1,10 +1,11 @@
 import { Truck, CheckCircle, Clock } from "lucide-react"
+import { PackageStatus } from '@/contracts/package'
 
 export interface WarehouseInventoryPackageData {
   id: string
   description: string
   sender: string
-  status: "Entregado" | "En reparto" | "En tránsito"
+  status: PackageStatus
   date: string
   progress: number
   zone: string
@@ -24,15 +25,15 @@ export const warehouseInventoryPriorityColorMap = {
 }
 
 export const warehouseInventoryStatusIconMap = {
-  Entregado: {
+  [PackageStatus.DELIVERED]: {
     icon: CheckCircle,
     color: "text-green-500",
   },
-  "En reparto": {
+  [PackageStatus.OUT_FOR_DELIVERY]: {
     icon: Truck,
     color: "text-blue-500",
   },
-  "En tránsito": {
+  [PackageStatus.IN_TRANSIT]: {
     icon: Clock,
     color: "text-orange-500",
   },

@@ -5,6 +5,8 @@ export const clientStats = {
     activeClients: 1158,
 }
 
+import { ClientStatus } from '@/contracts/user'
+
 export const clients = [
     {
         id: "CLI-001",
@@ -12,7 +14,7 @@ export const clients = [
         email: "juan.perez@email.com",
         phone: "+54 11 4567-8901",
         totalShipments: 15,
-        status: "Activo",
+        status: ClientStatus.ACTIVE,
         lastOrder: "2024-01-15",
     },
     {
@@ -21,7 +23,7 @@ export const clients = [
         email: "maria.garcia@email.com",
         phone: "+54 11 4567-8902",
         totalShipments: 8,
-        status: "Activo",
+        status: ClientStatus.ACTIVE,
         lastOrder: "2024-01-14",
     },
     {
@@ -30,7 +32,7 @@ export const clients = [
         email: "carlos.lopez@email.com",
         phone: "+54 11 4567-8903",
         totalShipments: 23,
-        status: "VIP",
+        status: ClientStatus.VIP,
         lastOrder: "2024-01-15",
     },
     {
@@ -39,7 +41,7 @@ export const clients = [
         email: "ana.martin@email.com",
         phone: "+54 11 4567-8904",
         totalShipments: 3,
-        status: "Nuevo",
+        status: ClientStatus.NEW,
         lastOrder: "2024-01-13",
     },
 ]

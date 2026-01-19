@@ -1,9 +1,11 @@
+import { PackageStatus } from '@/contracts/package'
+
 export const problemPackages = [
   {
     id: "TRK-001229",
     description: "Cable USB-C",
     problem: "Destinatario ausente",
-    status: "Pendiente",
+    status: PackageStatus.EXCEPTION,
     lastAttempt: "15/01 16:30",
   },
 ]

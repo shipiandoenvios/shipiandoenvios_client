@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Package, Truck, MapPin, User, LogOut, Menu } from "lucide-react"
-import { ActiveSection } from "@/app/[locale]/user/page"
+import { ActiveSection } from "@/app/[locale]/user/types"
 
 interface UserSidebarProps {
   activeSection: ActiveSection

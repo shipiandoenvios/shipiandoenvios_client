@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Package, MapPin, User, Calendar, Phone } from "lucide-react"
 import { PackageData, PackageStatus } from "@/contracts/package"
+import { getPackageStatusColor } from '@/lib/status'
 import { Button } from "@/components/ui/button"
 import { canCancelPackage } from "@/utils/canCancelPackage"
 import { useAuthStore } from "@/store/store"
@@ -11,6 +12,7 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useStatusTranslation } from "@/packages/internationalization/useStatusTranslation"
+import { useTranslations } from 'next-intl'
 
 interface UserPackageDetailContentProps {
   selectedPackage?: PackageData
@@ -18,23 +20,12 @@ interface UserPackageDetailContentProps {
 
 export function UserPackageDetailContent({ selectedPackage }: UserPackageDetailContentProps) {
   const tStatus = useStatusTranslation();
+  const t = useTranslations('logistics');
   const packageDetail = selectedPackage;
   const user = useAuthStore((state) => state.user);
   const canCancel = packageDetail && user ? canCancelPackage(user, packageDetail) : false;
   const [loading, setLoading] = useState(false);
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case PackageStatus.DELIVERED:
-        return 'bg-green-600'
-      case PackageStatus.OUT_FOR_DELIVERY:
-      case PackageStatus.IN_TRANSIT:
-        return 'bg-blue-600'
-      case PackageStatus.EXCEPTION:
-        return 'bg-red-600'
-      default:
-        return 'bg-gray-400'
-    }
-  }
+  const getStatusColor = (status?: string) => getPackageStatusColor(status)
 
   if (!packageDetail) {
     return (
@@ -130,19 +121,19 @@ export function UserPackageDetailContent({ selectedPackage }: UserPackageDetailC
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ status: "CANCELLED" })
                     });
-                    toast.success("Paquete cancelado correctamente");
+                    toast.success(t('labels.packageCanceled'));
                     // Opcional: recargar la página o refrescar datos
                     window.location.reload();
                   } catch (err: any) {
                     // Mostrar siempre el mensaje exacto del backend si existe
                     const backendMsg = err?.data?.message || err?.message;
-                    toast.error(backendMsg || "Error al cancelar el paquete");
+                    toast.error(backendMsg || t('labels.errorCancelPackage'));
                   } finally {
                     setLoading(false);
                   }
                 }}
               >
-                {loading ? "Cancelando..." : "Cancelar paquete"}
+                {loading ? t('labels.canceling') : t('labels.cancelPackage')}
               </Button>
             </div>
           )}
@@ -203,7 +194,7 @@ export function UserPackageDetailContent({ selectedPackage }: UserPackageDetailC
               <MapPin className="w-5 h-5 text-logistics-primary mt-0.5" />
               <div>
                 <p className="text-sm text-gray-600">Dirección</p>
-                <p className="font-medium">{packageDetail.destination ?? '—'}</p>
+                <p className="font-medium">{typeof packageDetail.destination === 'string' ? packageDetail.destination : packageDetail.destination ? `${packageDetail.destination.street ? packageDetail.destination.street + ', ' : ''}${packageDetail.destination.city}, ${packageDetail.destination.country}` : '—'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

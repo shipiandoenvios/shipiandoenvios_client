@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Eye, Clock, User, AlertTriangle, CheckCircle } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchJson } from "@/lib/api"
+import { fetchJson, extractList } from "@/lib/api"
 
 type Session = { user: string; status: string; ip?: string; location?: string; device?: string; time?: string }
 type Log = { user: string; action: string; type: string; time?: string; ip?: string }
@@ -22,8 +22,8 @@ export function SecurityContent() {
           fetchJson('/api/admin/activity-logs?limit=50').catch(() => []),
         ])
         if (!mounted) return
-        setRecentSessions(Array.isArray(sessionsRes) ? sessionsRes : sessionsRes?.items ?? sessionsRes?.data ?? [])
-        setActivityLogs(Array.isArray(logsRes) ? logsRes : logsRes?.items ?? logsRes?.data ?? [])
+        setRecentSessions(extractList(sessionsRes).items)
+        setActivityLogs(extractList(logsRes).items)
       } catch {
         if (mounted) {
           setRecentSessions([])

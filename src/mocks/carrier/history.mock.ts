@@ -1,9 +1,11 @@
+import { PackageStatus } from '@/contracts/package'
+
 export interface Delivery {
     id: string;
     recipient: string;
     address: string;
     phone: string;
-    status: "Entregado" | "Fallido" | "Pendiente";
+    status: PackageStatus;
     time: string;
     receivedBy: string;
     comments: string;
