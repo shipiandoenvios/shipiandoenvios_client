@@ -6,6 +6,7 @@ import { fetchJson, getCount, extractList } from "@/lib/api"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { useError } from "@/hooks/use-error"
 import { ActiveSection } from "@/app/[locale]/user/types"
+import { RefreshCw } from "lucide-react"
 
 interface UserDashboardContentProps {
   setActiveSection: (section: ActiveSection) => void
@@ -16,52 +17,70 @@ export function UserDashboardContent({ setActiveSection }: UserDashboardContentP
   const [error, setError] = useState<string | null>(null);
   const { error: shownError, showError, clearError } = useError();
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchData = async () => {
+    setIsRefreshing(true);
+    clearError();
+    try {
+      const [packagesCount, shipmentsCount, trackingCount] = await Promise.all([
+        getCount('/api/package'),
+        getCount('/api/shipment'),
+        getCount('/api/tracking-event'),
+      ]);
+      setStats([
+        { title: 'Paquetes', value: packagesCount, section: 'packages', bgColor: 'bg-blue-50', color: 'text-blue-600', icon: (() => null) },
+        { title: 'Envíos', value: shipmentsCount, section: 'shipments', bgColor: 'bg-green-50', color: 'text-green-600', icon: (() => null) },
+        { title: 'Eventos', value: trackingCount, section: 'tracking', bgColor: 'bg-yellow-50', color: 'text-yellow-600', icon: (() => null) },
+      ]);
+    } catch (err: any) {
+      const msg = err?.message || 'Error cargando estadísticas';
+      setError(msg);
+      showError(msg);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const [packagesCount, shipmentsCount, trackingCount] = await Promise.all([
-          getCount('/api/package'),
-          getCount('/api/shipment'),
-          getCount('/api/tracking-event'),
-        ]);
-        if (!mounted) return;
-        setStats([
-          { title: 'Paquetes', value: packagesCount, section: 'packages', bgColor: 'bg-blue-50', color: 'text-blue-600', icon: (() => null) },
-          { title: 'Envíos', value: shipmentsCount, section: 'shipments', bgColor: 'bg-green-50', color: 'text-green-600', icon: (() => null) },
-          { title: 'Eventos', value: trackingCount, section: 'tracking', bgColor: 'bg-yellow-50', color: 'text-yellow-600', icon: (() => null) },
-        ]);
-      } catch (err: any) {
-        const msg = err?.message || 'Error cargando estadísticas';
-        setError(msg);
-        showError(msg);
-      }
-    }
-    load();
-    // fetch recent activity separately
+    let cancelled = false;
     (async () => {
+      if (cancelled) return;
+      await fetchData();
       try {
         const a = await fetchJson('/api/user/activity?limit=5').catch(() => null);
         const aList = extractList(a);
-        setRecentActivity(aList.items);
+        if (!cancelled) setRecentActivity(aList.items);
       } catch {
-        setRecentActivity([]);
+        if (!cancelled) setRecentActivity([]);
       }
     })();
-    return () => { mounted = false };
-  }, [showError]);
+    return () => { cancelled = true };
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Bienvenido a tu Portal</h1>
-        <p className="text-gray-600">Gestiona tus envíos y mantén tu información actualizada</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Bienvenido a tu Portal</h1>
+          <p className="text-gray-600">Gestiona tus envíos y mantén tu información actualizada</p>
+        </div>
+        <div>
+          <Button variant="outline" onClick={() => fetchData()} disabled={isRefreshing}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            {isRefreshing ? 'Recargando...' : 'Recargar'}
+          </Button>
+        </div>
       </div>
       {/* Stats Grid */}
       {error && <ErrorMessage message={error} className="mb-4" />}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.length === 0 && !error && (
+          <div className="col-span-full text-center text-gray-500 py-8">
+            No tienes datos aún. ¡Comienza creando tu primer paquete o envío!
+          </div>
+        )}
         {stats.map((stat) => {
           const Icon = stat.icon || (() => null);
           return (

@@ -1,7 +1,7 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Truck, MapPin, Clock, CheckCircle, Home, Warehouse, AlertTriangle, Package as PackageIcon } from "lucide-react"
+import { Truck, MapPin, Clock, CheckCircle, Home, Warehouse, AlertTriangle, Package as PackageIcon, RefreshCw } from "lucide-react"
 import { ActiveSection } from "@/app/[locale]/user/types"
 
 interface TimelineEvent {
@@ -38,26 +38,25 @@ export function UserTrackingContent({ package: pkg, setActiveSection }: UserTrac
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchEvents() {
-      setLoading(true);
-      setError(null);
-      try {
-        // Fetch tracking events for the shipment/package
-        if (!pkg.shipmentId) {
-          setEvents([]);
-          setLoading(false);
-          return;
-        }
-        const { items } = await listTrackingEvents({ shipmentId: pkg.shipmentId });
-        setEvents(items);
-      } catch (e: any) {
-        setError(e?.message || "Error al obtener eventos de tracking");
+  const fetchEvents = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (!pkg.shipmentId) {
         setEvents([]);
-      } finally {
-        setLoading(false);
+        return;
       }
+      const { items } = await listTrackingEvents({ shipmentId: pkg.shipmentId });
+      setEvents(items);
+    } catch (e: any) {
+      setError(e?.message || "Error al obtener eventos de tracking");
+      setEvents([]);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchEvents();
   }, [pkg.shipmentId]);
 
@@ -112,13 +111,22 @@ export function UserTrackingContent({ package: pkg, setActiveSection }: UserTrac
                 <p className="text-gray-600">{pkg.description ?? "Sin descripción"}</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setActiveSection("detail")}
-              className="text-logistics-primary"
-            >
-              Ver Detalles
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => fetchEvents()}
+                className="text-logistics-primary"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" /> Recargar
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setActiveSection("detail")}
+                className="text-logistics-primary"
+              >
+                Ver Detalles
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

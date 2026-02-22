@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export interface PaginationMeta {
   page: number;
@@ -19,9 +19,9 @@ export function usePagination(options: UsePaginationOptions = {}) {
 
   const pages = Math.ceil(total / limit);
 
-  const setMeta = (meta: { total: number }) => {
+  const setMeta = useCallback((meta: { total: number }) => {
     setTotal(meta.total);
-  };
+  }, []);
 
   return {
     page,

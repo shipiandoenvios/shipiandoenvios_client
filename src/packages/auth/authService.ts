@@ -26,13 +26,14 @@ export const authService = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       } as RequestInit);
-      // The API returns { success, user, message } (and sets cookie)
-      if (!res || !res.success) {
-        return { success: false, message: res?.message || "Credenciales inválidas" };
+      // La API puede responder plano o envuelto en { data, meta }
+      const payload = res?.data && typeof res.data === 'object' ? res.data : res;
+      if (!payload || !payload.success) {
+        return { success: false, message: payload?.message || res?.message || "Credenciales inválidas" };
       }
-      const user = res.user as UserInfo | undefined | null;
+      const user = (payload as any).user as UserInfo | undefined | null;
       if (!user) return { success: false, message: "Respuesta inválida del servidor" };
-      return { success: true, user: this.extractUserInfo(user), message: res.message };
+      return { success: true, user: this.extractUserInfo(user), message: payload.message };
     } catch (error) {
       console.error("Error al autenticar usuario:", error);
       return {
@@ -96,18 +97,19 @@ export const authService = {
     const pick = priority.find((p) => roles.includes(p));
     switch (pick) {
       case "ADMIN":
-        return "/app/dashboard";
+        return "/admin";
       case "WAREHOUSE":
+        return "/warehouse";
       case "CARRIER":
-        return "/app/dashboard";
+        return "/carrier";
       case "EMPRESA":
       case "EMPLOYEE":
-        return "/app/accountant";
+        return "/admin";
       case "USER":
       case "CLIENT":
       case "STORE":
       default:
-        return "/app/client";
+        return "/user";
     }
   },
 };

@@ -11,9 +11,11 @@ function extractMessage(err: any) {
   return String(err);
 }
 
+import { useCallback } from 'react'
+
 export function useError() {
   const [error, setError] = useState<string | null>(null);
-  const showError = (err: any) => setError(extractMessage(err) ?? 'Error inesperado');
-  const clearError = () => setError(null);
+  const showError = useCallback((err: any) => setError(extractMessage(err) ?? 'Error inesperado'), []);
+  const clearError = useCallback(() => setError(null), []);
   return { error, showError, clearError };
 } 

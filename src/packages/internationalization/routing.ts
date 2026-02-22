@@ -12,6 +12,9 @@ export const routing = defineRouting({
     "/web/services": {
       es: "/web/servicios",
     },
+    "/web/pricing": {
+      es: "/web/precios",
+    },
     "/web/contact": {
       es: "/web/contacto",
     },

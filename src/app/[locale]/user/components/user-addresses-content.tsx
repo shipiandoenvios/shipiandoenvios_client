@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MapPin, Plus, Trash2, Edit } from "lucide-react"
+import { MapPin, Plus, Trash2, Edit, RefreshCw } from "lucide-react"
 import { useEffect, useState } from "react"
 import { fetchJson, extractList } from "@/lib/api"
 
@@ -10,17 +10,28 @@ type Address = { id: string; name: string; street: string; city: string; state?:
 
 export function UserAddressesContent() {
   const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAddresses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchJson('/api/user/addresses').catch(() => null);
+      const itemsList = extractList(res);
+      setAddresses(itemsList.items);
+    } catch (e: any) {
+      setError(e?.message || 'Error cargando direcciones');
+      setAddresses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      try {
-        const res = await fetchJson('/api/user/addresses').catch(() => null);
-        const itemsList = extractList(res);
-        if (mounted) setAddresses(itemsList.items);
-      } catch {
-        if (mounted) setAddresses([]);
-      }
+      if (mounted) await fetchAddresses();
     })();
     return () => { mounted = false };
   }, []);
@@ -28,9 +39,16 @@ export function UserAddressesContent() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Mis Direcciones</h1>
-        <p className="text-gray-600">Gestiona tus direcciones de entrega</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Mis Direcciones</h1>
+          <p className="text-gray-600">Gestiona tus direcciones de entrega</p>
+        </div>
+        <div>
+          <Button onClick={() => fetchAddresses()} disabled={loading} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" /> {loading ? 'Recargando...' : 'Recargar'}
+          </Button>
+        </div>
       </div>
 
       {/* Add New Address */}

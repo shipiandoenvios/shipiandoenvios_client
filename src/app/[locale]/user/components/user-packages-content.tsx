@@ -4,14 +4,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Package, Search, CheckCircle, Truck } from "lucide-react"
+import { Package, Search, CheckCircle, Truck, RefreshCw } from "lucide-react"
 import { ActiveSection } from "@/app/[locale]/user/types"
 import { getPackageStatusColor } from '@/lib/status'
 import { PackageData, PackageStatus, TrackingEventType } from "@/contracts/package"
 import { TrackingData } from "@/app/[locale]/user/types"
 import { useStatusTranslation } from "@/packages/internationalization/useStatusTranslation"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useEffect, useCallback, Dispatch, SetStateAction } from "react"
+import { useEffect, useCallback, Dispatch, SetStateAction, useRef } from "react"
 import { useError } from "@/hooks/use-error"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { usePagination } from "@/hooks/use-pagination"
@@ -28,25 +28,46 @@ interface UserPackagesContentProps {
 export function UserPackagesContent({ setSelectedPackage, setActiveSection }: UserPackagesContentProps) {
   const tStatus = useStatusTranslation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [packages, setPackages] = useState<PackageData[]>([]);
   const [loading, setLoading] = useState(false);
   const { error, showError, clearError } = useError();
   const { page, setPage, limit, setLimit, total, pages, setMeta } = usePagination({ initialLimit: 20 });
 
+  // Debounce search input to avoid firing requests on every keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  const abortRef = useRef<AbortController | null>(null);
+
   const fetchPackages = useCallback(async () => {
+    // Cancel previous pending request (if any)
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     clearError();
     try {
-      const { items, pagination } = await listPackages({ page, limit, search: searchTerm });
+      const { items, pagination } = await listPackages({ page, limit, search: debouncedSearch, signal: controller.signal });
       setPackages(items);
       setMeta({ total: pagination?.total || 0 });
-    } catch (err) {
-      showError("Error de conexión. Intenta de nuevo más tarde.");
+    } catch (err: any) {
+      // Ignore abort errors
+      if (err?.name === 'AbortError') return;
+      console.debug('[UserPackages] fetchPackages error:', err);
+      showError(err ?? "Error de conexión. Intenta de nuevo más tarde.");
       setPackages([]);
     } finally {
       setLoading(false);
+      // clear ref if this was the last controller
+      if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [page, limit, searchTerm, setMeta, showError, clearError]);
+  }, [page, limit, debouncedSearch, setMeta, showError, clearError]);
 
   useEffect(() => {
     fetchPackages();
@@ -94,17 +115,22 @@ export function UserPackagesContent({ setSelectedPackage, setActiveSection }: Us
       {/* Search */}
       <Card className="border-0 shadow-lg">
         <CardContent className="p-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              placeholder="Buscar por código o descripción..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              className="pl-12 h-12 text-lg"
-            />
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                placeholder="Buscar por código o descripción..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                className="pl-12 h-12 text-lg"
+              />
+            </div>
+            <Button onClick={() => { setPage(1); fetchPackages(); }} disabled={loading} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" /> Recargar
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -87,7 +87,7 @@ const isModuleEnabled = (pathname: string) => {
 };
 
 // Cookie names (server-side). Use env vars (AUTH_COOKIE_NAME, USER_COOKIE_NAME) to avoid hardcoded names.
-const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || "sopy-auth-token";
+const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || "shipiando_auth_token";
 const USER_COOKIE_NAME = process.env.USER_COOKIE_NAME || "sopy-user";
 
 const isAuthenticated = (request: NextRequest): boolean => {

@@ -44,11 +44,13 @@ export function LoginForm() {
   };
 
   const onSubmit = async (data: LoginFormValues) => {
+    console.log('[LoginForm] Submit called with data:', data);
     setIsLoading(true);
     setError(null);
 
     try {
       const result = await authService.login(data) as LoginResponse & { token?: string };
+      console.debug('[LoginForm] Login result:', result);
 
       if (!result.success) {
         setError(result.message || "Error al iniciar sesión");
@@ -61,7 +63,9 @@ export function LoginForm() {
       }
 
       // The server sets an HttpOnly cookie with the JWT. We avoid storing the token in localStorage.
+      console.debug('[LoginForm] Setting auth with user:', result.user);
       setAuth(true, null, result.user as UserInfo);
+      console.debug('[LoginForm] Auth set, checking store...');
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -76,6 +80,7 @@ export function LoginForm() {
 
       const redirectPath = authService.getRedirectPathByRole(result.user.roles || result.user.role);
       const fullPath = `/${locale}${redirectPath}`;
+      console.debug('[LoginForm] Redirecting to:', fullPath);
       window.location.href = fullPath;
     } catch (err) {
       setError("Error de conexión. Intenta de nuevo más tarde.");

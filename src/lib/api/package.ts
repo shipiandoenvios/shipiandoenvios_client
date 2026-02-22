@@ -3,10 +3,10 @@ import { appendPaginationToUrl } from '../pagination';
 import { getApiUrl } from '@/packages/config';
 import type { PackageData, PaginatedResult } from '@/contracts/package';
 
-export async function listPackages(options?: { page?: number; limit?: number; search?: string; status?: string; }) {
-  const { page = 1, limit = 20, search, status } = options || {};
+export async function listPackages(options?: { page?: number; limit?: number; search?: string; status?: string; signal?: AbortSignal; }) {
+  const { page = 1, limit = 20, search, status, signal } = options || {};
   const url = appendPaginationToUrl(getApiUrl('/api/package'), { page, limit, search, status: status !== 'all' ? status : undefined });
-  const data = await fetchJson(url);
+  const data = await fetchJson(url, { signal });
   const { items, pagination } = extractList(data);
   return { items: items as PackageData[], pagination } as PaginatedResult<PackageData>;
 }

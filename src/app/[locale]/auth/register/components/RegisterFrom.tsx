@@ -17,6 +17,7 @@ import { RegisterFormValues, registerSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
 import { getApiUrl } from "@/packages/config";
 import { fetchJson } from '@/lib/api';
+import { authService } from '@/packages/auth/authService';
 import { LocationAutocomplete } from "./LocationAutocomplete";
 import { UserInfo } from "@/store/store";
 
@@ -63,26 +64,50 @@ export function RegisterForm() {
     setIsLoading(true);
     setError(null);
 
+    // Filtrar confirmPassword antes de enviar al backend
+    const { confirmPassword, ...toSend } = data;
+
     try {
-      const result = await fetchJson(getApiUrl(`/api/auth/register`), {
+      const res = await fetch(getApiUrl(`/api/auth/register`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
-      }) as RegisterResponse;
+        credentials: 'include',
+        body: JSON.stringify(toSend),
+      });
 
-      if (!result.success) {
-        setError(result.message || "Error al registrarse");
+      const text = await res.text();
+      let data: any = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      console.debug('[Register] response status:', res.status, 'body:', data);
+
+      if (!res.ok) {
+        setError(data?.message || `HTTP ${res.status}`);
+        return;
+      }
+      const result = (Object.keys(data || {}).length > 0 ? data : null) as RegisterResponse | null;
+      if (result && result.success && result.user) {
+        setAuth(true, (result.token as string) || null, result.user as UserInfo);
+        window.location.href = "/";
+        return;
+      }
+      try {
+        const refreshed = await authService.refresh();
+        if (refreshed?.success && refreshed.user) {
+          setAuth(true, null as any, refreshed.user as UserInfo);
+          window.location.href = "/";
+          return;
+        }
+      } catch (e) {
+        console.error('Refresh after register failed', e);
+      }
+      if (res.ok) {
+        window.location.href = "/auth/login?registered=1";
         return;
       }
 
-      if (!result.token || !result.user) {
-        setError("Respuesta inválida del servidor");
-        return;
-      }
-
-      setAuth(true, result.token, result.user);
+      setError(data?.message || "Respuesta inválida del servidor");
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 

@@ -14,15 +14,21 @@ export default function Login() {
   const locale = pathname.split("/")[1];
 
   useEffect(() => {
+    console.debug('[LoginPage] useEffect - user:', user);
     if (user) {
+      console.debug('[LoginPage] User found, redirecting...');
       const roles = user.roles || (user.role ? [user.role] : []);
       if (roles.includes("USER") || roles.includes("CLIENT")) {
-        router.push(`/${locale}/app/client/dashboard`);
+        router.push(`/${locale}/user`);
       } else if (roles.includes("ADMIN") || roles.includes("SUPER_ADMIN")) {
-        router.push(`/${locale}/app/dashboard`);
+        router.push(`/${locale}/admin`);
+      } else if (roles.includes("WAREHOUSE")) {
+        router.push(`/${locale}/warehouse`);
+      } else if (roles.includes("CARRIER")) {
+        router.push(`/${locale}/carrier`);
       } else {
-        // fallback: ADMIN, EMPRESA, ACCOUNTANT, etc.
-        router.push(`/${locale}/app/accountant/dashboard`);
+        // fallback
+        router.push(`/${locale}/user`);
       }
     }
   }, [user, router, locale]);
