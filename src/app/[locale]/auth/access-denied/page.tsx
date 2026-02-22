@@ -7,28 +7,11 @@ import { useState } from "react";
 
 export default function AccessDenied() {
   const { logout } = useAuthStore();
-  const [onClick, setOnClick] = useState<boolean>(false);
+  const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
 
   const handleLogoutAndRedirect = async () => {
-    setOnClick(true);
+    setIsRedirecting(true);
     logout();
-    // try {
-    //   const response = await fetch(getApiUrl("/api/auth/logout"), {
-    //     method: "POST",
-    //     credentials: "include",
-    //   });
-
-    //   if (!response.ok) {
-    //     console.error("Error en logout:", await response.text());
-    //   }
-    // } catch (error) {
-    //   console.error("Error al cerrar sesión:", error);
-    // } finally {
-    //   setTimeout(() => {
-    //     const locale = window.location.pathname.split("/")[1] || "es";
-    //     window.location.href = `/${locale}/web/pricing`;
-    //   }, 100);
-    // }
   };
 
   return (
@@ -42,10 +25,10 @@ export default function AccessDenied() {
         </p>
         <Button
           onClick={handleLogoutAndRedirect}
-          disabled={onClick}
+          disabled={isRedirecting}
           className="mt-4 px-6 py-2 rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600 transition cursor-pointer"
         >
-          {!onClick ? "Ver planes y contratar" : "Redirigiendo..."}
+          {!isRedirecting ? "Ver planes y contratar" : "Redirigiendo..."}
         </Button>
       </div>
     </div>

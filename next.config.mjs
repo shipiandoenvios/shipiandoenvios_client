@@ -4,7 +4,9 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Tu configuración adicional aquí
+  images: {
+    domains: ['i.pinimg.com'],
+  },
 };
 
-export default withNextIntl(nextConfig); 
+export default withNextIntl(nextConfig);

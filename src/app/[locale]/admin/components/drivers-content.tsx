@@ -1,0 +1,160 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Truck, Plus, MapPin, Package, Clock, Star } from "lucide-react"
+import { useEffect, useState } from "react"
+import { DriverStatus } from '@/contracts/user'
+import { useStatusTranslation } from '@/packages/internationalization/useStatusTranslation'
+import { getDriverStatusColor } from '@/lib/status'
+import { fetchJson, extractList } from "@/lib/api"
+
+const defaultDriverStats = { totalDrivers: 0, onRoute: 0, available: 0, outOfService: 0 }
+
+
+export function DriversContent() {
+  const [drivers, setDrivers] = useState<any[]>([])
+  const [driverStats, setDriverStats] = useState<any>(defaultDriverStats)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const [dRes, sRes] = await Promise.all([
+          fetchJson('/api/driver?limit=200').catch(() => []),
+          fetchJson('/api/driver/stats').catch(() => null),
+        ])
+        if (!mounted) return
+        const { items: driversList } = extractList(dRes)
+        setDrivers(driversList)
+        if (sRes) setDriverStats(sRes)
+      } catch {
+        if (mounted) {
+          setDrivers([])
+          setDriverStats(defaultDriverStats)
+        }
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
+
+  const tStatus = useStatusTranslation();
+
+  const getStatusColor = (status: DriverStatus | string) => getDriverStatusColor(status?.toString?.() ?? "")
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Gestión de Transportistas</h1>
+        <Button className="bg-logistics-primary hover:bg-logistics-primary/90 text-white rounded-lg">
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Transportista
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Transportistas</p>
+                <p className="text-3xl font-bold text-gray-900">{driverStats.totalDrivers}</p>
+              </div>
+              <Truck className="w-8 h-8 text-logistics-primary" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">En Ruta</p>
+                <p className="text-3xl font-bold text-gray-900">{driverStats.onRoute}</p>
+              </div>
+              <Badge className="bg-blue-500 text-white">En ruta</Badge>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Disponibles</p>
+                <p className="text-3xl font-bold text-gray-900">{driverStats.available}</p>
+              </div>
+              <Badge className="bg-green-500 text-white">Activo</Badge>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Fuera de Servicio</p>
+                <p className="text-3xl font-bold text-gray-900">{driverStats.outOfService}</p>
+              </div>
+              <Badge className="bg-red-500 text-white">Inactivo</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Drivers Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {drivers.map((driver) => (
+          <Card key={driver.id} className="border-0 shadow-md">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-logistics-primary/10 rounded-full flex items-center justify-center">
+                    <Truck className="w-6 h-6 text-logistics-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-gray-900">{driver.name}</CardTitle>
+                    <p className="text-sm text-gray-600">{driver.id}</p>
+                  </div>
+                </div>
+                <Badge className={`${getStatusColor(driver.status)} text-white`}>{tStatus.driver(driver.status ?? "")}</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">{driver.zone}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Truck className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">{driver.vehicle}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Package className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">{driver.assignedShipments} envíos asignados</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">{driver.deliveries} entregas completadas</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  <span className="text-gray-700">{driver.rating}/5.0 valoración</span>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button size="sm" variant="outline" className="flex-1 rounded-lg">
+                  Ver Detalles
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-logistics-primary hover:bg-logistics-primary/90 text-white rounded-lg"
+                >
+                  Asignar Envío
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}

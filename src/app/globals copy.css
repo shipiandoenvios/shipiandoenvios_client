@@ -1,0 +1,420 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tema claro (default) */
+:root {
+  /* Colores principales de SHIPIANDO */
+  --primary: hsl(210 43% 30%);
+  --primary-hover: hsl(210 43% 40%);
+  --secondary: hsl(210 38% 95%);
+  --tertiary: hsl(210 60% 50%);
+  
+  /* Colores de fondo y texto */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222.2 84% 4.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222.2 84% 4.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222.2 84% 4.9%);
+  
+  /* Colores de estado */
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary-foreground: hsl(210 43% 30%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --accent: hsl(210 40% 96%);
+  --accent-foreground: hsl(222.2 84% 4.9%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+  
+  /* Bordes y elementos de UI */
+  --border: hsl(214.3 31.8% 91.4%);
+  --border-light: rgba(229, 231, 235, 0.8);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(210 43% 30%);
+  --radius: 0.75rem;
+  
+  /* Colores para gráficos */
+  --chart-1: hsl(12 76% 61%);
+  --chart-2: hsl(173 58% 39%);
+  --chart-3: hsl(197 37% 24%);
+  --chart-4: hsl(43 74% 66%);
+  --chart-5: hsl(27 87% 67%);
+  
+  /* Colores específicos de SHIPIANDO */
+  --logistics-primary: hsl(210 43% 30%);
+  --logistics-secondary: hsl(210 38% 95%);
+  --logistics-dark: hsl(210 50% 20%);
+  --logistics-light: hsl(210 30% 90%);
+  --logistics-accent: hsl(210 60% 50%);
+  
+  /* Sidebar */
+  --sidebar: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(222.2 84% 4.9%);
+  --sidebar-primary: hsl(210 43% 30%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(210 38% 95%);
+  --sidebar-accent-foreground: hsl(210 43% 30%);
+  --sidebar-border: hsl(214.3 31.8% 91.4%);
+  --sidebar-ring: hsl(210 43% 30%);
+}
+
+/* Tema oscuro */
+.dark {
+  /* Colores principales de SHIPIANDO */
+  --primary: hsl(210 43% 40%);
+  --primary-hover: hsl(210 43% 50%);
+  --secondary: hsl(210 38% 15%);
+  --tertiary: hsl(210 60% 60%);
+  
+  /* Colores de fondo y texto */
+  --background: hsl(222.2 84% 4.9%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222.2 84% 4.9%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222.2 84% 4.9%);
+  --popover-foreground: hsl(210 40% 98%);
+  
+  /* Colores de estado */
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+  --accent: hsl(217.2 32.6% 17.5%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 40% 98%);
+  
+  /* Bordes y elementos de UI */
+  --border: hsl(217.2 32.6% 17.5%);
+  --border-light: rgba(64, 64, 64, 0.8);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(210 43% 40%);
+  
+  /* Colores para gráficos */
+  --chart-1: hsl(220 70% 50%);
+  --chart-2: hsl(160 60% 45%);
+  --chart-3: hsl(30 80% 55%);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+  
+  /* Colores específicos de SHIPIANDO */
+  --logistics-primary: hsl(210 43% 40%);
+  --logistics-secondary: hsl(210 38% 15%);
+  --logistics-dark: hsl(210 50% 15%);
+  --logistics-light: hsl(210 30% 50%);
+  --logistics-accent: hsl(210 60% 60%);
+  
+  /* Sidebar */
+  --sidebar: hsl(222.2 84% 4.9%);
+  --sidebar-foreground: hsl(210 40% 98%);
+  --sidebar-primary: hsl(210 43% 40%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(217.2 32.6% 17.5%);
+  --sidebar-accent-foreground: hsl(210 40% 98%);
+  --sidebar-border: hsl(217.2 32.6% 17.5%);
+  --sidebar-ring: hsl(210 43% 40%);
+}
+
+/* Aplicar variables a todo el documento */
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Transición suave al cambiar de tema */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 200ms;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Estilos adicionales para SHIPIANDO */
+.logistics-gradient {
+  background: linear-gradient(135deg, rgba(43, 77, 111, 0.9) 0%, rgba(29, 53, 77, 0.95) 100%);
+}
+
+.logistics-hero {
+  background-image: url("/images/logistics-hero.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.logistics-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(43, 77, 111, 0.85) 0%, rgba(29, 53, 77, 0.9) 100%);
+}
+
+.logistics-card {
+  background-color: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s;
+}
+
+.logistics-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.logistics-button-primary {
+  background-color: var(--logistics-primary);
+  color: white;
+  font-weight: 500;
+}
+
+.logistics-button-primary:hover {
+  background-color: var(--logistics-dark);
+}
+
+.logistics-button-secondary {
+  background-color: white;
+  color: var(--logistics-primary);
+  border: 1px solid var(--logistics-primary);
+  font-weight: 500;
+}
+
+.logistics-button-secondary:hover {
+  background-color: var(--logistics-light);
+}
+
+.logistics-text-primary {
+  color: var(--logistics-primary);
+}
+
+.logistics-bg-primary {
+  background-color: var(--logistics-primary);
+}
+
+.logistics-icon-circle {
+  background-color: var(--logistics-primary);
+  color: white;
+  padding: 1rem;
+  border-radius: 9999px;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Estilos para estados de envío */
+.status-pending {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border-color: #FDE68A;
+}
+
+.status-in-transit {
+  background-color: var(--logistics-light);
+  color: var(--logistics-dark);
+  border-color: var(--logistics-primary);
+}
+
+.status-delivered {
+  background-color: #D1FAE5;
+  color: #065F46;
+  border-color: #A7F3D0;
+}
+
+.status-cancelled {
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border-color: #FECACA;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-padding {
+    padding: 0.75rem 1rem;
+  }
+
+  .mobile-text {
+    font-size: 0.875rem;
+  }
+}
+
+/* Sidebar específicos */
+.sidebar-header {
+  background-color: var(--logistics-primary);
+  color: white;
+}
+
+.sidebar-item-active {
+  background-color: var(--logistics-primary);
+  color: white;
+}
+
+.sidebar-item-hover:hover {
+  background-color: color-mix(in srgb, var(--logistics-primary) 10%, transparent);
+}
+
+/* Nuevos estilos basados en la imagen */
+.logistics-nav {
+  background-color: var(--logistics-primary);
+  color: white;
+  padding: 1rem 0;
+}
+
+.logistics-nav-item {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  transition: background-color 0.2s;
+}
+
+.logistics-nav-item:hover {
+  background-color: var(--logistics-dark);
+}
+
+.logistics-search-box {
+  background-color: white;
+  border-top-left-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
+  border-right: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+}
+
+.logistics-search-box:focus {
+  outline: none;
+}
+
+.logistics-search-button {
+  background-color: var(--logistics-primary);
+  color: white;
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.logistics-search-button:hover {
+  background-color: var(--logistics-dark);
+}
+
+.logistics-section-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: var(--logistics-dark);
+}
+
+.logistics-feature-circle {
+  background-color: var(--logistics-primary);
+  color: white;
+  border-radius: 9999px;
+  width: 6rem;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.logistics-feature-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.logistics-feature-text {
+  text-align: center;
+  color: #4B5563;
+}
+
+.logistics-cta-button {
+  background-color: var(--logistics-primary);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  transition: background-color 0.2s;
+  width: 100%;
+  text-align: center;
+}
+
+.logistics-cta-button:hover {
+  background-color: var(--logistics-dark);
+}
+
+.logistics-footer {
+  background-color: var(--logistics-primary);
+  color: white;
+  padding: 1.5rem 0;
+}

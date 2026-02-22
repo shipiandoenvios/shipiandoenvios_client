@@ -9,27 +9,24 @@ const inter = Inter({ subsets: ["latin"] });
 
 interface RootLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: string }>;
+  params?: Promise<{ locale: string }>;
 }
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: RootLayoutProps) {
-  const { locale } = await params;
+export default async function LocaleLayout({ children, params }: RootLayoutProps) {
+  const resolvedParams = params ? await params : { locale: "es" };
+  const { locale } = resolvedParams;
+
   const messages = await getDictionary(locale);
 
   return (
-    <html lang={locale}>
-      <body className={inter.className}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>{children}</Providers>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <Providers>
+        <div className={inter.className}>{children}</div>
+      </Providers>
+    </NextIntlClientProvider>
   );
 }

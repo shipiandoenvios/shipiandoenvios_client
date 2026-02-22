@@ -208,6 +208,65 @@
           "cta": "Send query"
         }
       }
+    },
+    "logistics": {
+      "status": {
+        "CREATED": "Created",
+        "AWAITING_CHECKIN": "Awaiting Check-in",
+        "AT_ORIGIN": "At Origin",
+        "IN_WAREHOUSE": "In Warehouse",
+        "IN_TRANSIT": "In Transit",
+        "OUT_FOR_DELIVERY": "Out for Delivery",
+        "DELIVERED": "Delivered",
+        "RETURNED": "Returned",
+        "EXCEPTION": "Exception"
+      },
+      "trackingEvent": {
+        "CREATED": "Created",
+        "LABEL_PRINTED": "Label Printed",
+        "PICKED_UP": "Picked Up",
+        "IN_TRANSIT": "In Transit",
+        "HUB_TRANSFER": "Hub Transfer",
+        "OUT_FOR_DELIVERY": "Out for Delivery",
+        "DELIVERED": "Delivered",
+        "DELAYED": "Delayed",
+        "EXCEPTION": "Exception",
+        "RETURN_INITIATED": "Return Initiated",
+        "RETURNED": "Returned"
+      }
+    }
+    ,
+    "driverStatus": {
+      "ON_ROUTE": "On Route",
+      "ACTIVE": "Active",
+      "OUT_OF_SERVICE": "Out of Service",
+      "REST": "Rest",
+      "BUSY": "Busy",
+      "UNKNOWN": "Unknown"
+    },
+    "clientStatus": {
+      "VIP": "VIP",
+      "ACTIVE": "Active",
+      "NEW": "New",
+      "INACTIVE": "Inactive"
+    }
+    ,
+    "labels": {
+      "cancelPackage": "Cancel package",
+      "canceling": "Canceling...",
+      "deliveredMetric": "Delivered",
+      "deliveredToday": "Delivered Today",
+      "confirmPickupTitle": "Confirm Pickup"
+      ,
+      "packageCanceled": "Package canceled successfully",
+      "errorCancelPackage": "Error canceling the package"
+      ,
+      "delivered": "Delivered"
+      ,
+      "markAsDelivered": "Mark as Delivered",
+      "notDelivered": "Not Delivered",
+      "confirmDeliveryTitle": "Confirm Delivery",
+      "confirmDeliveryDesc": "Confirm the delivery with detailed tracking"
     }
   }
 }

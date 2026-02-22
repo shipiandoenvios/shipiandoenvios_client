@@ -5,8 +5,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/packages/design-system/components/ui/accordion";
-import { Button } from "@/packages/design-system/components/ui/button";
+  Button,
+} from "@/packages/design-system/components/ui";
 import { PhoneCall, HelpCircle, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -75,7 +75,7 @@ export const FAQ = () => {
                     className="gap-2 bg-[#1E4063] text-white px-6 py-6 rounded-xl font-bold var(--font-nunito) shadow-md transition-all duration-300"
                     asChild
                   >
-                    <Link href="/contact">
+                    <Link href="/web/contact">
                       <PhoneCall className="h-5 w-5" /> Contactar ahora
                     </Link>
                   </Button>

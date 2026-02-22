@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { getApiUrl } from "@/packages/config";
+import { fetchJson } from '@/lib/api';
+import { authService } from "@/packages/auth/authService";
+import { onAuthEvent } from '@/lib/auth-events';
 
 // Tipo para la información del usuario
 export type UserInfo = {
@@ -8,6 +11,7 @@ export type UserInfo = {
   email: string;
   name: string | null;
   role: string;
+  roles?: string[];
   active: boolean;
   rut: string | null;
   giroType: string | null;
@@ -33,6 +37,12 @@ export type Notification = {
   message: string;
   type: "success" | "error" | "info" | "warning";
 };
+
+// Tipo para el período
+export interface Period {
+  month: string;
+  year: number;
+}
 
 // Interfaz para el estado de autenticación
 interface AuthState {
@@ -61,17 +71,17 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user }),
 
       setAuth: (isAuthenticated, token, user) => {
-        // También guardar el token en localStorage para el middleware
-        if (token) {
-          localStorage.setItem("auth-token", token);
-        }
-
-        set({ isAuthenticated, token, user });
+        // Do NOT persist token in localStorage for security; server sets HttpOnly cookie.
+        set({ isAuthenticated, token: token || null, user });
       },
 
-      logout: () => {
-        // Limpiar también localStorage
-        localStorage.removeItem("auth-token");
+      logout: async () => {
+        try {
+          // Tell server to clear cookie using centralized helper
+          await authService.logout();
+        } catch (e) {
+          // ignore network errors
+        }
 
         set({
           user: null,
@@ -83,9 +93,44 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "sopy-auth-store", // Nombre para localStorage
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );
+
+// Register for auth events (refresh failed) to clear the store and force logout
+onAuthEvent((ev) => {
+  if (ev === 'refresh-failed' || ev === 'logout') {
+    (async () => {
+      try {
+        // Centralized logout: clear server cookie and local auth state
+        await useAuthStore.getState().logout();
+      } catch (e) {
+        console.error('Error during logout on auth event', e);
+      }
+
+      try {
+        // Add a global notification to inform the user
+        useGlobalStore.getState().addNotification({
+          id: 'session-expired',
+          message: 'Tu sesión ha expirado. Por favor inicia sesión de nuevo.',
+          type: 'error',
+        });
+      } catch (e) {
+        console.error('Error adding notification on auth event', e);
+      }
+
+      try {
+        // Redirect to login page to force re-authentication
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
+      } catch (e) {
+        console.error('Error redirecting to login', e);
+      }
+    })();
+  }
+});
 
 // Interfaz para el estado global
 export interface GlobalState {
@@ -93,8 +138,8 @@ export interface GlobalState {
   addNotification: (notification: Notification) => void;
   removeNotification: (id: string) => void;
 
-  currentPeriod: string;
-  setCurrentPeriod: (period: string) => void;
+  currentPeriod: Period;
+  setCurrentPeriod: (period: Period) => void;
 
   currentClientId: string | null;
   clients: ClientInfo[];
@@ -124,8 +169,8 @@ export const useGlobalStore = create<GlobalState>()(
         })),
 
       // Estado para el período
-      currentPeriod: "2025-01", // Valor predeterminado
-      setCurrentPeriod: (period: string) => set({ currentPeriod: period }),
+      currentPeriod: { month: "01", year: new Date().getFullYear() },
+      setCurrentPeriod: (period: Period) => set({ currentPeriod: period }),
 
       // Estado para clientes
       currentClientId: null,
@@ -145,40 +190,11 @@ export const useGlobalStore = create<GlobalState>()(
         set({ isLoadingClients: true, loadError: null });
 
         try {
-          const response = await fetch(getApiUrl("/api/clients"), {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            cache: "no-store",
-          });
-
-          if (!response.ok) {
-            // En lugar de lanzar un error, manejamos el estado de error pero devolvemos un array vacío
-            console.error(`[GlobalStore] Error HTTP: ${response.status}`);
-            set({
-              clients: [], // Array vacío en caso de error
-              isLoadingClients: false,
-              loadError: null, // No mostramos el error al usuario
-            });
-            return;
-          }
-
-          const data = await response.json();
-
-          set({
-            clients: data.clients || [], // Nos aseguramos de que siempre sea un array
-            isLoadingClients: false,
-          });
+          const data = await fetchJson(getApiUrl("/api/client"));
+          set({ clients: data.clients || [], isLoadingClients: false });
         } catch (error) {
-          console.error("[GlobalStore] Error cargando clientes:", error);
-          // En caso de error, simplemente establecemos un array vacío de clientes
-          set({
-            clients: [],
-            loadError: null, // No mostramos el error al usuario
-            isLoadingClients: false,
-          });
+          console.error("Error loading clients:", error);
+          set({ loadError: "Error loading clients", isLoadingClients: false });
         }
       },
 
@@ -187,43 +203,19 @@ export const useGlobalStore = create<GlobalState>()(
 
         try {
           console.log("[GlobalStore] Forzando recarga de clientes...");
-          const response = await fetch(getApiUrl("/api/clients"), {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            cache: "no-store",
-          });
-
-          if (!response.ok) {
-            // En lugar de lanzar un error, manejamos el estado de error pero devolvemos un array vacío
-            console.error(`[GlobalStore] Error HTTP: ${response.status}`);
-            set({
-              clients: [], // Array vacío en caso de error
-              isLoadingClients: false,
-              loadError: null, // No mostramos el error al usuario
-            });
-            return;
-          }
-
-          const data = await response.json();
+          const data = await fetchJson(getApiUrl("/api/client"));
           console.log(
             `[GlobalStore] ${
               data.clients?.length || 0
             } clientes cargados (forzado)`
           );
 
-          set({
-            clients: data.clients || [], // Nos aseguramos de que siempre sea un array
-            isLoadingClients: false,
-          });
+          set({ clients: data.clients || [], isLoadingClients: false });
         } catch (error) {
           console.error("[GlobalStore] Error cargando clientes:", error);
-          // En caso de error, simplemente establecemos un array vacío de clientes
           set({
             clients: [],
-            loadError: null, // No mostramos el error al usuario
+            loadError: null,
             isLoadingClients: false,
           });
         }

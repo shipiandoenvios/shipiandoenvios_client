@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Shipiando Envios",
@@ -11,21 +15,25 @@ export const metadata: Metadata = {
     shortcut: "/shipiando_logo.jpeg",
   },
   manifest: "/manifest.json",
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
   authors: [{ name: "Shipiando Envios" }],
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
-      <body>{children}</body>
+    <html lang="es" className="light" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

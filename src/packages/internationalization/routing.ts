@@ -21,8 +21,11 @@ export const routing = defineRouting({
     "/contact": {
       es: "/contacto",
     },
-    "/login": {
-      es: "/iniciar-sesion",
+    "/auth/login": {
+      es: "/auth/login",
+    },
+    "/auth/register": {
+      es: "/auth/register",
     },
     "/app": "/app",
     "/app/dashboard": {

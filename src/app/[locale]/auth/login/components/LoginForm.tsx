@@ -7,14 +7,23 @@ import { useParams } from "next/navigation";
 import { MoveRight, MailIcon, LockIcon, Eye, EyeOff } from "lucide-react";
 import { LoginFormValues, loginSchema } from "@/packages/auth/schemas";
 import { useAuthStore } from "@/store/store";
+import { authService } from '@/packages/auth/authService';
 import { getApiUrl } from "@/packages/config";
+import { UserInfo } from "@/store/store";
+
+interface LoginResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: UserInfo;
+}
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const params = useParams();
-  const locale = params.locale as string; // Obtener el idioma actual
+  const locale = params.locale as string;
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
@@ -39,23 +48,20 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const response = await fetch(getApiUrl(`/api/auth/login`), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-
-      const result = await response.json();
+      const result = await authService.login(data) as LoginResponse & { token?: string };
 
       if (!result.success) {
         setError(result.message || "Error al iniciar sesión");
         return;
       }
 
-      setAuth(true, result.token, result.user);
+      if (!result.user) {
+        setError("Respuesta inválida del servidor");
+        return;
+      }
+
+      // The server sets an HttpOnly cookie with the JWT. We avoid storing the token in localStorage.
+      setAuth(true, null, result.user as UserInfo);
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -68,28 +74,7 @@ export function LoginForm() {
         return;
       }
 
-      if (trialEnd && new Date(trialEnd) < nowDate && !planActive) {
-        window.location.href = `/${locale}/auth/access-denied`;
-        return;
-      }
-      let redirectPath;
-
-      switch (result.user.role) {
-        case "SUPER_ADMIN":
-          redirectPath = "/app/dashboard";
-          break;
-        case "ADMIN":
-        case "EMPRESA":
-        case "ENCARGADO":
-        case "ADMINISTRATIVO":
-        case "ANALISTA":
-        case "EMPLOYEE":
-          redirectPath = "/app/accountant/dashboard";
-          break;
-        default:
-          redirectPath = "/app/client/dashboard";
-      }
-
+      const redirectPath = authService.getRedirectPathByRole(result.user.roles || result.user.role);
       const fullPath = `/${locale}${redirectPath}`;
       window.location.href = fullPath;
     } catch (err) {
@@ -117,7 +102,7 @@ export function LoginForm() {
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MailIcon className="h-5 w-5 text-[#7dd3c8]" />
+            <MailIcon className="h-5 w-5 text-[#1E4063]" />
           </div>
           <input
             id="email"
@@ -143,7 +128,7 @@ export function LoginForm() {
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <LockIcon className="h-5 w-5 text-[#7dd3c8]" />
+            <LockIcon className="h-5 w-5 text-[#1E4063]" />
           </div>
           <input
             id="password"
@@ -178,7 +163,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold var(--font-nunito) text-white bg-gradient-to-r from-[#FFB800] to-amber-500 hover:from-amber-500 hover:to-[#FFB800] transition-all duration-300 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold var(--font-nunito) text-white bg-[#1E4063] hover:bg-[#0798F0] transition-all duration-300 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? (
             "Iniciando sesión..."
